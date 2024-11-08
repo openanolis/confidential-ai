@@ -1,0 +1,99 @@
+services:
+  attestation-agent:
+    build:
+      dockerfile: Dockerfile.aa
+    volumes:
+      - attestation-agent-sock:/run/confidential-containers/attestation-agent/
+    devices:
+      - /dev/tdx_guest
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
+    init: true
+    environment:
+      - RUST_LOG=debug
+    command: [ "sh", "-c", "start.sh --trustee-addr ${TRUSTEE_URL} --as-addr ${TRUSTEE_URL}/as/" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "ss -n --listen | grep /run/confidential-containers/attestation-agent/attestation-agent.sock" ]
+      interval: 3s
+      start_period: 0s
+      start_interval: 3s
+      retries: 5
+      timeout: 5s
+
+  confidential-data-hub:
+    build:
+      dockerfile: Dockerfile.cdh
+    volumes:
+      - attestation-agent-sock:/run/confidential-containers/attestation-agent/
+      - decryption-key:/tmp/cachefs-decryptionkey
+    network_mode: host
+    init: true
+    command:
+      - cdh-start.sh
+      - --trustee-addr
+      - ${TRUSTEE_URL}
+      - --key-id
+      - ${CDH_KEY_ID}
+      - --resource-path
+      - /tmp/cachefs-decryptionkey/key
+    healthcheck:
+      test: [ "CMD-SHELL", "[ -f /tmp/cachefs-decryptionkey/key ]" ]
+      interval: 10s
+      start_period: 0s
+      start_interval: 3s
+      retries: 5
+      timeout: 5s
+    depends_on:
+      attestation-agent:
+        condition: service_healthy
+
+  cachefs:
+    image: eci-nydus-registry.cn-hangzhou.cr.aliyuncs.com/kangaroo/cachefs:1.0.7-2.1
+    volumes:
+      - /tmp/encrypted-model:/tmp/encrypted-model:shared
+      - /tmp/plaintext-model:/tmp/plaintext-model:shared
+      - decryption-key:/tmp/cachefs-decryptionkey
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    network_mode: host
+    init: true
+    command:
+      - safe_cachefs.sh
+      - cache
+      - --source-dir
+      - /tmp/encrypted-model
+      - --cache-dir
+      - memory
+      - --cache-size
+      - "10240"
+      - --passfile
+      - /tmp/cachefs-decryptionkey/key
+      - --serf-join
+      - "${CACHEFS_INIT_NODE}"
+      - cachefs
+      - /tmp/plaintext-model
+    healthcheck:
+      test: [ "CMD-SHELL", "mount | grep /tmp/plaintext-model | grep fuse.cachefs" ]
+      interval: 10s
+      start_period: 0s
+      start_interval: 3s
+      retries: 5
+      timeout: 5s
+    depends_on:
+      oss:
+        condition: service_healthy
+        restart: true
+      confidential-data-hub:
+        condition: service_healthy
+        restart: true
+      tng:
+        condition: service_healthy
+        restart: false
+
+volumes:
+  attestation-agent-sock:
+  decryption-key:
