@@ -1,0 +1,37 @@
+# Copyright (c) 2024 by Alibaba.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+ARG BASE_IMAGE=debian:stable-slim
+
+FROM ${BASE_IMAGE} AS builder
+
+ARG CODE_BASE=https://github.com/confidential-containers/guest-components.git
+ARG REV=5fba45c
+
+WORKDIR /usr/src
+
+RUN apt update -y && apt install -y clang protobuf-compiler git curl musl-tools libssl-dev && \
+    apt clean all && \
+    rm -rf /tmp/*
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN rustup target add x86_64-unknown-linux-musl
+
+# Build confidential-data-hub
+RUN git clone ${CODE_BASE} && cd guest-components && \
+    git reset --hard ${REV} && \
+    cd confidential-data-hub/hub && \
+    cargo build --release --bin cdh-oneshot --no-default-features --features "bin,kbs" --target x86_64-unknown-linux-musl
+
+RUN strip /usr/src/guest-components/target/x86_64-unknown-linux-musl/release/cdh-oneshot
+
+FROM ${BASE_IMAGE}
+
+# Copy binaries
+COPY --from=builder /usr/src/guest-components/target/x86_64-unknown-linux-musl/release/cdh-oneshot /usr/local/bin/confidential-data-hub
+COPY cdh-start.sh /usr/bin/start.sh
