@@ -49,12 +49,12 @@ services:
       attestation-agent:
         condition: service_healthy
 
-  cachefs:
+  gocryptfs:
     image: eci-nydus-registry.cn-hangzhou.cr.aliyuncs.com/kangaroo/cachefs:1.0.7-2.1
     volumes:
       - /tmp/encrypted-model:/tmp/encrypted-model:shared
       - /tmp/plaintext-model:/tmp/plaintext-model:shared
-      - decryption-key:/tmp/cachefs-decryptionkey
+      - decryption-key:/tmp/gocryptfs-decryptionkey
     cap_add:
       - SYS_ADMIN
     devices:
@@ -77,22 +77,19 @@ services:
       - cachefs
       - /tmp/plaintext-model
     healthcheck:
-      test: [ "CMD-SHELL", "mount | grep /tmp/plaintext-model | grep fuse.cachefs" ]
+      test: [ "CMD-SHELL", "mount | grep /tmp/plaintext-model" ]
       interval: 10s
       start_period: 0s
       start_interval: 3s
       retries: 5
       timeout: 5s
     depends_on:
-      oss:
-        condition: service_healthy
-        restart: true
       confidential-data-hub:
         condition: service_healthy
         restart: true
-      tng:
-        condition: service_healthy
-        restart: false
+      # tng:
+      #   condition: service_healthy
+      #   restart: false
 
 volumes:
   attestation-agent-sock:
