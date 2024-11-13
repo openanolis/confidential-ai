@@ -11,7 +11,7 @@ REPO_URL=https://github.com/confidential-containers/trustee.git
 TAG=v0.10.1
 
 if [ ! -d "./trustee" ]; then
-    git clone --branch "$TAG" "$REPO_URL"
+    git clone --branch ${TAG} ${REPO_URL}
 fi
 cd trustee
 
@@ -30,8 +30,8 @@ docker compose up -d
 cd ..
 
 # 2. Download and encrypt model
-MODEL="$MODEL_TYPE"
-PASSWORD="$GOCRYPTFS_PASSWORD"
+MODEL=${MODEL_TYPE}
+PASSWORD=${GOCRYPTFS_PASSWORD}
 
 mkdir -p data
 cd data
@@ -44,7 +44,7 @@ if ! command -v gocryptfs >/dev/null 2>&1; then
     cd .. && rm -rf gocryptfs
 fi
 
-echo "$PASSWORD" > cachefs-password
+echo "${PASSWORD}" > cachefs-password
 if [ ! -d "./mount" ]; then
     mkdir ./mount
     cd mount
@@ -56,30 +56,30 @@ fi
 
 cd mount
 
-if [ "$MODEL" = "helloworld" ]; then
+if [ "${MODEL}" = "helloworld" ]; then
     mkdir -p ./helloworld
     echo "hello" > ./helloworld/hello.txt
     echo "world" > ./helloworld/world.txt
     cp -r ./helloworld ./plain
-elif [ "$MODEL" = "Qwen-7B-Chat"]; then
+elif [ "${MODEL}" = "Qwen-7B-Chat"]; then
     # if [ ! -d "./Qwen-7B-Chat" ]; then
     #     dnf install -y git-lfs
     #     git lfs install && git clone https://www.modelscope.cn/qwen/Qwen-7B-Chat.git
     # fi
     # cp -r ./Qwen-7B-Chat ./mount/plain
-    echo "model $MODEL not supported."
+    echo "model ${MODEL} not supported."
     exit 1
 else
-    echo "model $MODEL not supported."
+    echo "model ${MODEL} not supported."
     exit 1
 fi
 
 cd ..
 
 # 3. Upload encrypted model and password to KBS
-AccessKey=$ACCESS_KEY
-AccessSecret=$ACCESS_SECRET
-BucketName=$BUCKET_NAME
+AK=${ACCESS_KEY}
+AS=${ACCESS_SECRET}
+BUCKET=${BUCKET_NAME}
 
 if ! command -v ossutil >/dev/null 2>&1; then
     mkdir -p ossutil
@@ -91,15 +91,16 @@ if ! command -v ossutil >/dev/null 2>&1; then
     chmod 755 ossutil
     sudo mv ossutil /usr/local/bin/ && sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
 
-    ossutil_config="[default]\naccessKeyId=${AccessKey}\naccessKeySecret=${AccessSecret}\nregion=cn-beijing"
-    echo -e "${ossutil_config}" > /root/.ossutilconfig
-
     cd ../..
 fi
+if [ ! -f "/root/.ossutilconfig" ]; then
+    OSSUTIL_CONFIG="[default]\naccessKeyId=${AK}\naccessKeySecret=${AS}\nregion=cn-beijing"
+    echo -e "${OSSUTIL_CONFIG}" > /root/.ossutilconfig
+fi
 
-ossutil mb oss://${BucketName}
-ossutil mkdir oss://${BucketName}/${MODEL}
-ossutil cp -r ./mount/cipher/ oss://${BucketName}/${MODEL}/
+ossutil mb oss://${BUCKET}
+ossutil mkdir oss://${BUCKET}/${MODEL}
+ossutil cp -r ./mount/cipher/ oss://${BUCKET}/${MODEL}/
 
 if ! command -v oras >/dev/null 2>&1; then
     VERSION="1.2.0"
