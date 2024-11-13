@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# export $(grep -v '^#' ../.env | xargs)
+export $(grep -v '^#' ../.env.local | xargs)
+
+dnf update && dnf install -y git wget unzip
+
 # 1. Setup Trustee
 REPO_URL=https://github.com/confidential-containers/trustee.git
 TAG=v0.10.1
@@ -25,8 +30,8 @@ docker compose up -d
 cd ..
 
 # 2. Download and encrypt model
-MODEL=helloworld
-PASSWORD=alibaba@1688
+MODEL="$MODEL_TYPE"
+PASSWORD="$GOCRYPTFS_PASSWORD"
 
 mkdir -p data
 cd data
@@ -71,9 +76,31 @@ fi
 
 cd ..
 
-tar -czvf model.tar.gz -C ./mount cipher
-
 # 3. Upload encrypted model and password to KBS
+AccessKey=$ACCESS_KEY
+AccessSecret=$ACCESS_SECRET
+BucketName=$BUCKET_NAME
+
+if ! command -v ossutil >/dev/null 2>&1; then
+    mkdir -p ossutil
+    cd ossutil
+
+    curl -o ossutil-2.0.4-beta.10251600-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2-beta/2.0.4-beta.10251600/ossutil-2.0.4-beta.10251600-linux-amd64.zip
+    unzip ossutil-2.0.4-beta.10251600-linux-amd64.zip
+    cd ossutil-2.0.4-beta.10251600-linux-amd64
+    chmod 755 ossutil
+    sudo mv ossutil /usr/local/bin/ && sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
+
+    ossutil_config="[default]\naccessKeyId=${AccessKey}\naccessKeySecret=${AccessSecret}\nregion=cn-beijing"
+    echo -e "${ossutil_config}" > /root/.ossutilconfig
+
+    cd ../..
+fi
+
+ossutil mb oss://${BucketName}
+ossutil mkdir oss://${BucketName}/${MODEL}
+ossutil cp -r ./mount/cipher/ oss://${BucketName}/${MODEL}/
+
 if ! command -v oras >/dev/null 2>&1; then
     VERSION="1.2.0"
     curl -LO "https://github.com/oras-project/oras/releases/download/v${VERSION}/oras_${VERSION}_linux_amd64.tar.gz"
@@ -84,7 +111,6 @@ if ! command -v oras >/dev/null 2>&1; then
 fi
 
 oras pull ghcr.io/confidential-containers/staged-images/kbs-client:sample_only-x86_64-linux-gnu-68607d4300dda5a8ae948e2562fd06d09cbd7eca
-
 chmod +x ./kbs-client
-./kbs-client --url http://127.0.0.1:8080 config --auth-private-key ../trustee/kbs/config/private.key  set-resource --path test/cai/model --resource-file model.tar.gz
+
 ./kbs-client --url http://127.0.0.1:8080 config --auth-private-key ../trustee/kbs/config/private.key  set-resource --path test/cai/password --resource-file cachefs-password
