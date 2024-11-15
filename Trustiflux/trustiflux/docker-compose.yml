@@ -2,6 +2,10 @@ services:
   attestation-agent:
     build:
       dockerfile: Dockerfile.aa
+    environment:
+      - RUST_LOG=debug
+      - TRUSTEE_ADDR=${TRUSTEE_ADDR}
+      - AS_ADDR=${TRUSTEE_ADDR}/as/
     volumes:
       - attestation-agent-sock:/run/confidential-containers/attestation-agent/
     devices:
@@ -11,9 +15,7 @@ services:
       - NET_ADMIN
     network_mode: host
     init: true
-    environment:
-      - RUST_LOG=debug
-    command: [ "sh", "-c", "start.sh --trustee-addr ${TRUSTEE_URL} --as-addr ${TRUSTEE_URL}/as/" ]
+    command: [ "sh", "-c", "start.sh --trustee-addr ${TRUSTEE_ADDR} --as-addr ${TRUSTEE_ADDR}/as/" ]
     healthcheck:
       test: [ "CMD-SHELL", "ss -n --listen | grep /run/confidential-containers/attestation-agent/attestation-agent.sock" ]
       interval: 3s
@@ -25,21 +27,24 @@ services:
   confidential-data-hub:
     build:
       dockerfile: Dockerfile.cdh
+    environment:
+      - TRUSTEE_ADDR=${TRUSTEE_ADDR}
+      - CDH_KEY_ID=kbs:///${KBS_KEY_PATH}
     volumes:
       - attestation-agent-sock:/run/confidential-containers/attestation-agent/
-      - decryption-key:/tmp/cachefs-decryptionkey
+      - decryption-key:/tmp/gocryptfs-decryptionkey
     network_mode: host
     init: true
     command:
-      - cdh-start.sh
+      - start.sh
       - --trustee-addr
-      - ${TRUSTEE_URL}
+      - ${TRUSTEE_ADDR}
       - --key-id
       - ${CDH_KEY_ID}
       - --resource-path
-      - /tmp/cachefs-decryptionkey/key
+      - /tmp/gocryptfs-decryptionkey/key
     healthcheck:
-      test: [ "CMD-SHELL", "[ -f /tmp/cachefs-decryptionkey/key ]" ]
+      test: [ "CMD-SHELL", "[ -f /tmp/gocryptfs-decryptionkey/key ]" ]
       interval: 10s
       start_period: 0s
       start_interval: 3s
@@ -50,7 +55,13 @@ services:
         condition: service_healthy
 
   gocryptfs:
-    image: eci-nydus-registry.cn-hangzhou.cr.aliyuncs.com/kangaroo/cachefs:1.0.7-2.1
+    build:
+      dockerfile: Dockerfile.gocryptfs
+    environment:
+      - BUCKET_NAME=${BUCKET_NAME}
+      - MODEL_TYPE=${MODEL_TYPE}
+      - ACCESS_KEY=${ACCESS_KEY}
+      - ACCESS_SECRET=${ACCESS_SECRET}
     volumes:
       - /tmp/encrypted-model:/tmp/encrypted-model:shared
       - /tmp/plaintext-model:/tmp/plaintext-model:shared
@@ -62,20 +73,7 @@ services:
     network_mode: host
     init: true
     command:
-      - safe_cachefs.sh
-      - cache
-      - --source-dir
-      - /tmp/encrypted-model
-      - --cache-dir
-      - memory
-      - --cache-size
-      - "10240"
-      - --passfile
-      - /tmp/cachefs-decryptionkey/key
-      - --serf-join
-      - "${CACHEFS_INIT_NODE}"
-      - cachefs
-      - /tmp/plaintext-model
+      - start.sh
     healthcheck:
       test: [ "CMD-SHELL", "mount | grep /tmp/plaintext-model" ]
       interval: 10s

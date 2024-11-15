@@ -4,6 +4,9 @@
 
 ARG BASE_IMAGE=debian:stable-slim
 
+ARG TRUSTEE_ADDR
+ARG CDH_KEY_ID
+
 FROM ${BASE_IMAGE} AS builder
 
 ARG CODE_BASE=https://github.com/confidential-containers/guest-components.git
@@ -11,16 +14,38 @@ ARG REV=5fba45c
 
 WORKDIR /usr/src
 
-RUN apt update -y && apt install -y clang protobuf-compiler git curl musl-tools libssl-dev && \
+RUN printf '\
+    # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释\n\
+    deb http://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm main contrib non-free non-free-firmware\n\
+    # deb-src http://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm main contrib non-free non-free-firmware\n\
+    deb http://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-updates main contrib non-free non-free-firmware\n\
+    # deb-src http://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-updates main contrib non-free non-free-firmware\n\
+    deb http://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-backports main contrib non-free non-free-firmware\n\
+    # deb-src http://mirrors.tuna.tsinghua.edu.cn/debian/ bookworm-backports main contrib non-free non-free-firmware\n\
+    # 以下安全更新软件源包含了官方源与镜像站配置，如有需要可自行修改注释切换\n\
+    deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware\n\
+    # deb-src http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware\n\
+    ' > /etc/apt/sources.list
+
+RUN apt update -y && apt install -y clang protobuf-compiler git curl make musl-tools libssl-dev && \
     apt clean all && \
     rm -rf /tmp/*
 
 # Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
+RUN export RUSTUP_DIST_SERVER='https://mirrors.ustc.edu.cn/rust-static' && \
+    export RUSTUP_UPDATE_ROOT='https://mirrors.ustc.edu.cn/rust-static/rustup' && \
+    curl --proto '=https' --tlsv1.2 -sSf https://mirrors.aliyun.com/repo/rust/rustup-init.sh | \
+    sh  -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-
-RUN rustup target add x86_64-unknown-linux-musl
+RUN export RUSTUP_DIST_SERVER='https://mirrors.ustc.edu.cn/rust-static' && \
+    export RUSTUP_UPDATE_ROOT='https://mirrors.ustc.edu.cn/rust-static/rustup' && \
+    rustup target add x86_64-unknown-linux-musl
+RUN printf '\
+    [source.crates-io]\n\
+    replace-with = "aliyun"\n\
+    [source.aliyun]\n\
+    registry = "sparse+https://mirrors.aliyun.com/crates.io-index/"\n\
+    ' > ~/.cargo/config
 
 # Build confidential-data-hub
 RUN git clone ${CODE_BASE} && cd guest-components && \

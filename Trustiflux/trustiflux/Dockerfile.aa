@@ -4,6 +4,9 @@
 
 ARG BASE_IMAGE=alibaba-cloud-linux-3-registry.cn-hangzhou.cr.aliyuncs.com/alinux3/alinux3:latest
 
+ARG TRUSTEE_ADDR
+ARG AS_ADDR
+
 FROM ${BASE_IMAGE} AS builder
 
 ARG CODE_BASE=https://github.com/confidential-containers/guest-components.git
@@ -20,11 +23,20 @@ RUN yum update -y && yum install tar -y && \
     rm -rf /tmp/*
 
 # Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
+RUN export RUSTUP_DIST_SERVER='https://mirrors.ustc.edu.cn/rust-static' && \
+    export RUSTUP_UPDATE_ROOT='https://mirrors.ustc.edu.cn/rust-static/rustup' && \
+    curl --proto '=https' --tlsv1.2 -sSf https://mirrors.aliyun.com/repo/rust/rustup-init.sh | \
+    sh  -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-
-RUN rustup toolchain install 1.79.0-x86_64-unknown-linux-gnu
+RUN export RUSTUP_DIST_SERVER='https://mirrors.ustc.edu.cn/rust-static' && \
+    export RUSTUP_UPDATE_ROOT='https://mirrors.ustc.edu.cn/rust-static/rustup' && \
+    rustup toolchain install 1.79.0-x86_64-unknown-linux-gnu
+RUN printf '\
+    [source.crates-io]\n\
+    replace-with = "aliyun"\n\
+    [source.aliyun]\n\
+    registry = "sparse+https://mirrors.aliyun.com/crates.io-index/"\n\
+    ' > ~/.cargo/config
 
 # Build attestation-agent. Notice that libc version is not enough thus --release cannot pass
 RUN git clone ${CODE_BASE} && cd guest-components && \
@@ -36,7 +48,7 @@ RUN strip /tmp/guest-components/target/x86_64-unknown-linux-gnu/debug/ttrpc-aa
 FROM ${BASE_IMAGE}
 
 WORKDIR /tmp
-RUN yum update -y && yum install tar -y && \
+RUN yum update -y && yum install -y tar iproute && \
     curl https://download.01.org/intel-sgx/sgx-dcap/1.21/linux/distro/Anolis86/sgx_rpm_local_repo.tgz --output sgx_rpm_local_repo.tgz && \
     tar zxvf sgx_rpm_local_repo.tgz && \
     yum -y install yum-utils && yum-config-manager --add-repo file:///tmp/sgx_rpm_local_repo && \

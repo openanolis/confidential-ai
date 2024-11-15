@@ -2,7 +2,7 @@
 
 docker compose -f ./trustiflux/docker-compose.yml down
 
-rm ./trustiflux/docker-compose.yml
+fusermount -u /tmp/plaintext-model
 rm -rf /tmp/plaintext-model
 rm -rf /tmp/encrypted-model
 

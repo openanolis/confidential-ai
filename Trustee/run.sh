@@ -4,7 +4,7 @@ set -e
 # export $(grep -v '^#' ../.env | xargs)
 export $(grep -v '^#' ../.env.local | xargs)
 
-dnf update && dnf install -y git wget unzip
+dnf install -y git wget unzip
 
 # 1. Setup Trustee
 REPO_URL=https://github.com/confidential-containers/trustee.git
@@ -32,6 +32,7 @@ cd ..
 # 2. Download and encrypt model
 MODEL=${MODEL_TYPE}
 PASSWORD=${GOCRYPTFS_PASSWORD}
+PASSWORD_FILE=gocryptfs-password
 
 mkdir -p data
 cd data
@@ -44,14 +45,13 @@ if ! command -v gocryptfs >/dev/null 2>&1; then
     cd .. && rm -rf gocryptfs
 fi
 
-echo "$PASSWORD" > gocryptfs-password
-echo "${PASSWORD}" > cachefs-password
+echo "${PASSWORD}" > ${PASSWORD_FILE}
 if [ ! -d "./mount" ]; then
     mkdir ./mount
     cd mount
     mkdir -p cipher plain
-    cat ../gocryptfs-password | gocryptfs -init cipher
-    cat ../gocryptfs-password | gocryptfs cipher plain
+    cat ../${PASSWORD_FILE} | gocryptfs -init cipher
+    cat ../${PASSWORD_FILE} | gocryptfs cipher plain
     cd ..
 fi
 
@@ -81,6 +81,8 @@ cd ..
 AK=${ACCESS_KEY}
 AS=${ACCESS_SECRET}
 BUCKET=${BUCKET_NAME}
+KEY_PATH=${KBS_KEY_PATH}
+TRUSTEE_URL=http://127.0.0.1:8080
 
 if ! command -v ossutil >/dev/null 2>&1; then
     mkdir -p ossutil
@@ -115,4 +117,4 @@ fi
 oras pull ghcr.io/confidential-containers/staged-images/kbs-client:sample_only-x86_64-linux-gnu-68607d4300dda5a8ae948e2562fd06d09cbd7eca
 chmod +x ./kbs-client
 
-./kbs-client --url http://127.0.0.1:8080 config --auth-private-key ../trustee/kbs/config/private.key  set-resource --path test/cai/password --resource-file cachefs-password
+./kbs-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key  set-resource --path ${KEY_PATH} --resource-file ${PASSWORD_FILE}
