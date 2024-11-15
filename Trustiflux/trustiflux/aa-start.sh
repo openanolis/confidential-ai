@@ -36,6 +36,13 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
+if [ -n "${TRUSTEE_ADDR}" ]; then
+    trustee_address=${TRUSTEE_ADDR}
+fi
+if [ -n "${AS_ADDR}" ]; then
+    as_address=${AS_ADDR}
+fi
+
 cat << EOF > /etc/attestation-agent.toml
 [token_configs]
 [token_configs.coco_as]

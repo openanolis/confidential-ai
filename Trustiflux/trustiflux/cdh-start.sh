@@ -43,6 +43,13 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
+if [ -n "${TRUSTEE_ADDR}" ]; then
+    trustee_address=${TRUSTEE_ADDR}
+fi
+if [ -n "${CDH_KEY_ID}" ]; then
+    key_id=${CDH_KEY_ID}
+fi
+
 cat << EOF > /etc/confidential-data-hub.toml
 socket = "unix:///run/confidential-containers/cdh.sock"
 [kbc]
@@ -51,6 +58,7 @@ url = "${trustee_address}"
 EOF
 
 blob=$(confidential-data-hub -c /etc/confidential-data-hub.toml get-resource --resource-uri "${key_id}")
+echo "blob: $blob"
 echo "$blob" | base64 -d > "$resource_path"
 
 sleep 100000000
