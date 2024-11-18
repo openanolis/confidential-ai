@@ -12,9 +12,9 @@
 
 ## 环境准备
 
-- 阿里云TDX ECS：参考(构建TDX机密计算环境)[https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment]中“创建TDX实例”章节，推荐通过控制台创建。
-- 阿里云OSS：开通(阿里云OSS服务)[https://oss.console.aliyun.com/overview]。
-- 阿里云账号访问密钥：参考(创建AccessKey)[https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair]，获取并保存Access Key和Access Secret。
+- 阿里云TDX ECS：参考[构建TDX机密计算环境](https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment)中“创建TDX实例”章节，推荐通过控制台创建。
+- 阿里云OSS：开通[阿里云OSS服务](https://oss.console.aliyun.com/overview)。
+- 阿里云账号访问密钥：参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair)，获取并保存Access Key和Access Secret。
 
 ## 配置和启动Trustee
 

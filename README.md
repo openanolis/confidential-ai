@@ -12,9 +12,9 @@ According to the threat model, the first two steps occur on the user side, while
 
 ## Environment Preparation
 
-- Alibaba Cloud TDX ECS: Refer to the “Creating TDX Instances” section in (TDX Confidential Computing Environment guide)[https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment] and it's recommended to create it via the console.
-- Alibaba Cloud OSS: Activate (Alibaba Cloud OSS service)[https://oss.console.aliyun.com/overview].
-- Alibaba Cloud Account Access Keys: Refer to (guide for creating AccessKey)[https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair] to obtain and save the Access Key and Access Secret.
+- Alibaba Cloud TDX ECS: Refer to the “Creating TDX Instances” section in [TDX Confidential Computing Environment guide](https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment) and it's recommended to create it via the console.
+- Alibaba Cloud OSS: Activate [Alibaba Cloud OSS service](https://oss.console.aliyun.com/overview).
+- Alibaba Cloud Account Access Keys: Refer to [guide for creating AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair) to obtain and save the Access Key and Access Secret.
 
 ## Configuring and Starting Trustee
 
