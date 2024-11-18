@@ -106,7 +106,7 @@ Configure image acceleration based on Alibaba Cloud ACR. Refer to the official i
 
 2. Failed to Automatically Configure Alibaba Cloud PCCS
 
-You can configure it manually. If you have correctly created the Alibaba Cloud TDX ECS according to the preparation instructions, the region for your instance should be North China 2 (Beijing), i.e., cn-beijing. Manually create the /etc/sgx_default_qcnl.conf file and write the following content.
+You can configure it manually. If you have correctly created the Alibaba Cloud TDX ECS according to the preparation instructions, the region for your instance should be North China 2 (Beijing), i.e., `cn-beijing`. Manually create the `/etc/sgx_default_qcnl.conf` file and write the following content.
 
 ```shell
 # PCCS server address
