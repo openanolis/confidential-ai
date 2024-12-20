@@ -2,7 +2,7 @@
 
 ## 前言
 
-本文档指导你验证SecureAI的基本流程，该流程包括以下几个步骤。
+本文档指导你验证Confidential-AI的基本流程，该流程包括以下几个步骤。
 1. 部署Trustee，作为用户控制的、保存机密数据的组件；
 2. 加密模型文件，上传该加密模型到阿里云OSS，并将加密密钥保存在Trustee；
 3. 部署Trustiflux，作为云端可信组件；
@@ -66,18 +66,18 @@ EOF
 
 ### 运行Trustee
 
-1. 下载SecureAI代码。
+1. 下载Confidential-AI代码。
 
 ```shell
-git clone https://github.com/inclavare-containers/SecureAI.git
+git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. 将准备好的阿里云账号访问密钥写入`secureAI/.env`文件的对应位置。
+2. 将准备好的阿里云账号访问密钥写入`Confidential-AI/.env`文件的对应位置。
 
 3. 进入Trustee文件夹，运行`run.sh`文件。
 
 ```shell
-cd secureAI/Trustee
+cd Confidential-AI/Trustee
 ./run.sh
 ```
 
@@ -85,18 +85,18 @@ cd secureAI/Trustee
 
 ### 运行Trustiflux
 
-1. 下载SecureAI代码。
+1. 下载Confidential-AI代码。
 
 ```shell
-git clone https://github.com/inclavare-containers/SecureAI.git
+git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. 将准备好的阿里云账号访问密钥写入`secureAI/.env`文件的对应位置。
+2. 将准备好的阿里云账号访问密钥写入`Confidential-AI/.env`文件的对应位置。
 
 3. 进入Trustiflux文件夹，运行`run.sh`文件。
 
 ```shell
-cd secureAI/Trustiflux
+cd Confidential-AI/Trustiflux
 ./run.sh
 ```
 
