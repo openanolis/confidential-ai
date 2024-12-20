@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Quick start guides you through the basic verification process of SecureAI, which includes the following steps:
+Quick start guides you through the basic verification process of Confidential-AI, which includes the following steps:
 1. Deploying Trustee as a user-controlled component that stores sensitive data.
 2. Encrypting the model file, uploading the encrypted model to Alibaba Cloud OSS, and saving the encryption key in Trustee.
 3. Deploying Trustiflux as a trusted component in the cloud.
@@ -64,18 +64,18 @@ EOF
 
 ### Run Trustee
 
-1. Download the SecureAI code.
+1. Download the Confidential-AI code.
 
 ```shell
-git clone https://github.com/inclavare-containers/SecureAI.git
+git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. Write the prepared Alibaba Cloud account access keys to the corresponding positions in the `secureAI/.env` file.
+2. Write the prepared Alibaba Cloud account access keys to the corresponding positions in the `Confidential-AI/.env` file.
 
 3. Navigate to the Trustee folder and run the `run.sh` file.
 
 ```shell
-cd secureAI/Trustee
+cd Confidential-AI/Trustee
 ./run.sh
 ```
 
@@ -83,18 +83,18 @@ cd secureAI/Trustee
 
 ### Run Trustiflux
 
-1. Download the SecureAI code.
+1. Download the Confidential-AI code.
 
 ```shell
-git clone https://github.com/inclavare-containers/SecureAI.git
+git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. Write the prepared Alibaba Cloud account access keys to the corresponding positions in the `secureAI/.env` file.
+2. Write the prepared Alibaba Cloud account access keys to the corresponding positions in the `Confidential-AI/.env` file.
 
 3. Navigate to the Trustiflux folder and run the `run.sh` file.  
 
 ```shell
-cd secureAI/Trustiflux
+cd Confidential-AI/Trustiflux
 ./run.sh
 ```
 

@@ -1,4 +1,4 @@
-# Secure AI
+# Confidential AI
 
 ## File Overview
 
