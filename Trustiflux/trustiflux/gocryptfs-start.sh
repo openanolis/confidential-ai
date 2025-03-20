@@ -4,7 +4,7 @@ set -euo pipefail
 set -o noglob
 
 usage() {
-  echo "This script is used to download encrypted mode from Aliyun OSS and decrypt it." 1>&2
+  echo "This script is used to decrypt model with gocryptfs." 1>&2
 
   exit 1
 }
@@ -21,11 +21,6 @@ while [[ "$#" -gt 0 ]]; do
       ;;
   esac
 done
-
-# download encrypted model
-OSSUTIL_CONFIG="[default]\naccessKeyId=${ACCESS_KEY}\naccessKeySecret=${ACCESS_SECRET}\nregion=cn-beijing"
-echo -e "${OSSUTIL_CONFIG}" > /root/.ossutilconfig
-ossutil cp -r oss://${BUCKET_NAME}/${MODEL_TYPE}/ /tmp/encrypted-model/
 
 # decrypt encrypted model
 PASSWORD_FILE=/tmp/gocryptfs-decryptionkey/key
@@ -48,6 +43,8 @@ if [ "${FILE_EXISTS}" = false ]; then
     exit 1
 fi
 
-cat ${PASSWORD_FILE} | gocryptfs /tmp/encrypted-model /tmp/plaintext-model
+gocryptfs -debug -passfile ${PASSWORD_FILE} /tmp/encrypted-model /tmp/plaintext-model
 
 echo "model decrypted to '/tmp/plaintext-model'"
+
+sleep infinity
