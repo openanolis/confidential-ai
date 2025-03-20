@@ -1,46 +1,53 @@
 #!/bin/bash
 set -e
 
-# export $(grep -v '^#' ../.env | xargs)
 export $(grep -v '^#' ../.env | xargs)
 
 dnf install -y git wget unzip
 
-# 1. get encrypted-model from Aliyun OSS
-AK=${ACCESS_KEY}
-AS=${ACCESS_SECRET}
-BUCKET=${BUCKET_NAME}
+# 1. get encrypted-model from KBS
 MODEL=${MODEL_TYPE}
+MODEL_DIR=${KBS_MODEL_DIR}
+MODEL_FILE=gocryptfs-model
+TRUSTEE_URL=${TRUSTEE_ADDR}
 
 mkdir -p data
 cd data
+mkdir -p model
 
-if ! command -v ossutil >/dev/null 2>&1; then
-    mkdir -p ossutil
-    cd ossutil
+# TODO: upload trustee-client to oras, so we can download it there
+cp ../../Trustee/data/trustee-client ./trustee-client
+status=true
+for i in {00..99}; do
+    printf -v filename "%s.tar.gz.part%02d" "$MODEL_FILE" "$((10#$i))"
+    kbspath=$(printf "%s/%s" "${MODEL_DIR%/}" "$filename")
+    echo "get '$filename' from KBS with path: $kbspath"
+    # ./trustee-client --url ${TRUSTEE_URL} get-resource --path ${kbspath}
 
-    curl -o ossutil-2.0.4-beta.10251600-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2-beta/2.0.4-beta.10251600/ossutil-2.0.4-beta.10251600-linux-amd64.zip
-    unzip ossutil-2.0.4-beta.10251600-linux-amd64.zip
-    cd ossutil-2.0.4-beta.10251600-linux-amd64
-    chmod 755 ossutil
-    sudo mv ossutil /usr/local/bin/ && sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
+    tmpfile=$(mktemp) || exit 1
+    if ./trustee-client --url "${TRUSTEE_URL}" get-resource --path "${kbspath}" > "${tmpfile}"; then
+        if ! base64 -d "${tmpfile}" > "./model/${filename}"; then
+            echo "Error: Base64解码失败" >&2
+        fi
+    else
+        echo "Error: 第${i}个资源获取失败 (exit code $?)，请确认是否已获取到全部加密模型资源" >&2
+        status=false 
+    fi
+    rm -f "${tmpfile}"
 
-    cd ../..
-fi
-if [ ! -f "/root/.ossutilconfig" ]; then
-    ossutil_config="[default]\naccessKeyId=${AK}\naccessKeySecret=${AS}\nregion=cn-beijing"
-    echo -e "${ossutil_config}" > /root/.ossutilconfig
-fi
+    if [ "$status" = false ]; then
+        break
+    fi
+done
 
 cd ..
 
 mkdir -p /tmp/encrypted-model
-ossutil cp -r oss://${BUCKET}/${MODEL}/ /tmp/encrypted-model
+cat ./data/model/${MODEL_FILE}.tar.gz.part* | tar xvzf - -C /tmp/encrypted-model
 
 # 2. Setup Trustiflux
 mkdir -p /tmp/plaintext-model
 
 cd trustiflux
 
-# ./gen-compose.sh "${TRUSTEE_URL}" "kbs:///${KEY_PATH}"
 docker compose --env-file ../../.env up -d --build

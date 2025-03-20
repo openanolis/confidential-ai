@@ -4,17 +4,15 @@
 
 本文档指导你验证Confidential-AI的基本流程，该流程包括以下几个步骤。
 1. 部署Trustee，作为用户控制的、保存机密数据的组件；
-2. 加密模型文件，上传该加密模型到阿里云OSS，并将加密密钥保存在Trustee；
+2. 加密模型文件，上传该加密模型到Trustee，同时将加密密钥保存在Trustee；
 3. 部署Trustiflux，作为云端可信组件；
-4. 经过远程证明验证云端环境，从Trustee获取加密密钥，并从阿里云OSS下载加密模型，将其解密后挂载在可信环境中。
+4. 经过远程证明验证云端环境，从Trustee获取加密密钥，以及加密模型，将其解密后挂载在可信环境中。
 
 根据威胁模型，前两个步骤在用户侧发生，后两个步骤在云端发生。不过为了方便演示，本文档展示的流程基于同一台阿里云TDX ECS，并且使用本地网络。
 
 ## 环境准备
 
 - 阿里云TDX ECS：参考[构建TDX机密计算环境](https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment)中“创建TDX实例”章节，推荐通过控制台创建。
-- 阿里云OSS：开通[阿里云OSS服务](https://oss.console.aliyun.com/overview)。
-- 阿里云账号访问密钥：参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair)，获取并保存Access Key和Access Secret。
 
 ## 配置和启动Trustee
 
@@ -72,7 +70,13 @@ EOF
 git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. 将准备好的阿里云账号访问密钥写入`Confidential-AI/.env`文件的对应位置。
+2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustiflux侧保持一致。
+
+- `MODEL_TYPE`：模型类型，当前支持`helloworld`；
+- `GOCRYPTFS_PASSWORD`: 加密密钥字符串；
+- `KBS_KEY_PATH`: Trustee中加密密钥的路径；
+- `KBS_MODEL_DIR`: Trustee中加密模型的路径；
+- `TRUSTEE_ADDRESS`：Trustee的服务地址。
 
 3. 进入Trustee文件夹，运行`run.sh`文件。
 
@@ -91,13 +95,40 @@ cd Confidential-AI/Trustee
 git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. 将准备好的阿里云账号访问密钥写入`Confidential-AI/.env`文件的对应位置。
+2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustee侧保持一致。
+
+- `MODEL_TYPE`：模型类型，当前支持`helloworld`；
+- `GOCRYPTFS_PASSWORD`: 留空，将经过远程证明从Trustee获取；
+- `KBS_KEY_PATH`: Trustee中加密密钥的路径；
+- `KBS_MODEL_DIR`: Trustee中加密模型的路径；
+- `TRUSTEE_ADDRESS`：Trustee的服务地址。
 
 3. 进入Trustiflux文件夹，运行`run.sh`文件。
 
 ```shell
 cd Confidential-AI/Trustiflux
 ./run.sh
+```
+
+## 请求模型应用
+
+在Trustee侧，执行下述命令，会基于TNG可信信道，向Trustiflux发起请求。
+
+```shell
+curl http://127.0.0.1:9001/
+```
+
+Trustiflux侧部署了示例web服务，会返回其中已解密的模型文件列表，如果CAI部署成功，则可以看到类似如下结果。
+
+```shell
+{
+  "timestamp": "2025-03-20T07:28:07.718523",
+  "total_files": 2,
+  "files": [
+    "helloworld/hello.txt",
+    "helloworld/world.txt"
+  ]
+}
 ```
 
 ## Troubleshooting

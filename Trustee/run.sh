@@ -1,17 +1,25 @@
 #!/bin/bash
 set -e
 
-# export $(grep -v '^#' ../.env | xargs)
-export $(grep -v '^#' ../.env.local | xargs)
+export $(grep -v '^#' ../.env | xargs)
 
 dnf install -y git wget unzip
 
 # 1. Setup Trustee
-REPO_URL=https://github.com/confidential-containers/trustee.git
-TAG=v0.10.1
+REPO_URL=https://github.com/openanolis/trustee.git
+# TAG=v1.0.1
+COMMIT=17e0f5b356cbd1832d06d0021ad7abaa76767b9c
 
 if [ ! -d "./trustee" ]; then
-    git clone --branch ${TAG} ${REPO_URL}
+    if [ -n "${TAG}" ]; then
+        git clone --branch ${TAG} ${REPO_URL}
+    # elif [ -n "${COMMIT}" ]; then
+    #     git clone --depth 1 --no-checkout ${REPO_URL}
+    #     git fetch --depth 1 origin ${COMMIT}
+    #     git checkout ${COMMIT}
+    else
+        git clone ${REPO_URL}
+    fi
 fi
 cd trustee
 
@@ -25,12 +33,13 @@ fi
 cp ../docker-compose.yml ./docker-compose.yml
 cp /etc/sgx_default_qcnl.conf ./kbs/config/
 
-docker compose up -d
+docker compose --env-file ../../.env up -d
 
 cd ..
 
 # 2. Download and encrypt model
 MODEL=${MODEL_TYPE}
+MODEL_FILE=gocryptfs-model
 PASSWORD=${GOCRYPTFS_PASSWORD}
 PASSWORD_FILE=gocryptfs-password
 
@@ -75,46 +84,32 @@ else
     exit 1
 fi
 
+mkdir -p ../model && \
+tar cvzf - -C ./cipher . | split -d -b 2G - "../model/${MODEL_FILE}.tar.gz.part"
+
 cd ..
 
 # 3. Upload encrypted model and password to KBS
-AK=${ACCESS_KEY}
-AS=${ACCESS_SECRET}
-BUCKET=${BUCKET_NAME}
 KEY_PATH=${KBS_KEY_PATH}
-TRUSTEE_URL=http://127.0.0.1:8080
+MODEL_DIR=${KBS_MODEL_DIR}
+TRUSTEE_URL=${TRUSTEE_ADDR}
 
-if ! command -v ossutil >/dev/null 2>&1; then
-    mkdir -p ossutil
-    cd ossutil
+echo "upload '$PASSWORD_FILE' to KBS with path: $KEY_PATH"
+./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource --path ${KEY_PATH} --resource-file ${PASSWORD_FILE}
 
-    curl -o ossutil-2.0.4-beta.10251600-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2-beta/2.0.4-beta.10251600/ossutil-2.0.4-beta.10251600-linux-amd64.zip
-    unzip ossutil-2.0.4-beta.10251600-linux-amd64.zip
-    cd ossutil-2.0.4-beta.10251600-linux-amd64
-    chmod 755 ossutil
-    sudo mv ossutil /usr/local/bin/ && sudo ln -s /usr/local/bin/ossutil /usr/bin/ossutil
+for part in ./model/*; do
+    filename=$(basename "$part")
+    echo "upload '$filename' to KBS with path: $MODEL_DIR$filename"
+    ./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource --path ${MODEL_DIR}${filename} --resource-file ./model/${filename}
+done
 
-    cd ../..
-fi
-if [ ! -f "/root/.ossutilconfig" ]; then
-    OSSUTIL_CONFIG="[default]\naccessKeyId=${AK}\naccessKeySecret=${AS}\nregion=cn-beijing"
-    echo -e "${OSSUTIL_CONFIG}" > /root/.ossutilconfig
-fi
+ # WARNING: "allow_all.rego" can only be used in dev environment
+POLICY_FILE="allow_all.rego"
+cat <<EOF > ${POLICY_FILE}
+package policy
 
-ossutil mb oss://${BUCKET}
-ossutil mkdir oss://${BUCKET}/${MODEL}
-ossutil cp -r ./mount/cipher/ oss://${BUCKET}/${MODEL}/
+default allow = true
+EOF
+./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource-policy --policy-file ${POLICY_FILE}
 
-if ! command -v oras >/dev/null 2>&1; then
-    VERSION="1.2.0"
-    curl -LO "https://github.com/oras-project/oras/releases/download/v${VERSION}/oras_${VERSION}_linux_amd64.tar.gz"
-    mkdir -p oras-install/
-    tar -zxf oras_${VERSION}_*.tar.gz -C oras-install/
-    sudo mv oras-install/oras /usr/local/bin/
-    rm -rf oras_${VERSION}_*.tar.gz oras-install/
-fi
-
-oras pull ghcr.io/confidential-containers/staged-images/kbs-client:sample_only-x86_64-linux-gnu-68607d4300dda5a8ae948e2562fd06d09cbd7eca
-chmod +x ./kbs-client
-
-./kbs-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key  set-resource --path ${KEY_PATH} --resource-file ${PASSWORD_FILE}
+cd ..

@@ -4,17 +4,15 @@
 
 Quick start guides you through the basic verification process of Confidential-AI, which includes the following steps:
 1. Deploying Trustee as a user-controlled component that stores sensitive data.
-2. Encrypting the model file, uploading the encrypted model to Alibaba Cloud OSS, and saving the encryption key in Trustee.
+2. Encrypting the model file, uploading the encrypted model to Trustee, and saving the encryption key in Trustee.
 3. Deploying Trustiflux as a trusted component in the cloud.
-4. Verifying the cloud environment through remote attestation, obtaining the encryption key from Trustee, downloading the encrypted model from Alibaba Cloud OSS, and decrypting it to mount in a trusted environment.
+4. Verifying the cloud environment through remote attestation, obtaining the encryption key and the encrypted model from Trustee, and decrypting the model to mount in a trusted environment.
 
 According to the threat model, the first two steps occur on the user side, while the last two steps happen in the cloud. However, for the sake of demonstration, the process shown in this document is based on the same Alibaba Cloud TDX ECS and utilizes a local network.
 
 ## Environment Preparation
 
 - Alibaba Cloud TDX ECS: Refer to the “Creating TDX Instances” section in [TDX Confidential Computing Environment guide](https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment) and it's recommended to create it via the console.
-- Alibaba Cloud OSS: Activate [Alibaba Cloud OSS service](https://oss.console.aliyun.com/overview).
-- Alibaba Cloud Account Access Keys: Refer to [guide for creating AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair) to obtain and save the Access Key and Access Secret.
 
 ## Configuring and Starting Trustee
 
@@ -70,7 +68,12 @@ EOF
 git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. Write the prepared Alibaba Cloud account access keys to the corresponding positions in the `Confidential-AI/.env` file.
+2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustiflux-side configuration.
+- `MODEL_TYPE`: Model type, currently supports helloworld;
+- `GOCRYPTFS_PASSWORD`: Encryption key string;
+- `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
+- `KBS_MODEL_DIR`: Path to the encrypted model in Trustee;
+- `TRUSTEE_ADDRESS`: Service address of Trustee.
 
 3. Navigate to the Trustee folder and run the `run.sh` file.
 
@@ -89,13 +92,39 @@ cd Confidential-AI/Trustee
 git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
-2. Write the prepared Alibaba Cloud account access keys to the corresponding positions in the `Confidential-AI/.env` file.
+2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustee-side configuration.
+- `MODEL_TYPE`: Model type, currently supports helloworld;
+- `GOCRYPTFS_PASSWORD`: Leave empty; it will be obtained from Trustee via remote attestation;
+- `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
+- `KBS_MODEL_DIR`: Path to the encrypted model in Trustee;
+- `TRUSTEE_ADDRESS`: Service address of Trustee.
 
 3. Navigate to the Trustiflux folder and run the `run.sh` file.  
 
 ```shell
 cd Confidential-AI/Trustiflux
 ./run.sh
+```
+
+## Requesting Model Application
+
+On the Trustee side, execute the following command to send a request to Trustiflux via the TNG trusted channel:
+
+```shell
+curl http://127.0.0.1:9001/
+```
+
+The example web service deployed on the Trustiflux side will return a list of decrypted model files. If the CAI deployment is successful, you should see a response similar to the following:
+
+```shell
+{
+  "timestamp": "2025-03-20T07:28:07.718523",
+  "total_files": 2,
+  "files": [
+    "helloworld/hello.txt",
+    "helloworld/world.txt"
+  ]
+}
 ```
 
 ## Troubleshooting

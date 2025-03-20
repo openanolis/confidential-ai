@@ -1,7 +1,8 @@
 services:
   attestation-agent:
-    build:
-      dockerfile: Dockerfile.aa
+    # build:
+    #   dockerfile: Dockerfile.aa
+    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/attestation-agent:0.0.2
     environment:
       - RUST_LOG=debug
       - TRUSTEE_ADDR=${TRUSTEE_ADDR}
@@ -25,8 +26,9 @@ services:
       timeout: 5s
 
   confidential-data-hub:
-    build:
-      dockerfile: Dockerfile.cdh
+    # build:
+    #   dockerfile: Dockerfile.cdh
+    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/confidential-data-hub:0.0.2
     environment:
       - TRUSTEE_ADDR=${TRUSTEE_ADDR}
       - CDH_KEY_ID=kbs:///${KBS_KEY_PATH}
@@ -40,7 +42,7 @@ services:
       - --trustee-addr
       - ${TRUSTEE_ADDR}
       - --key-id
-      - ${CDH_KEY_ID}
+      - kbs:///${KBS_KEY_PATH}
       - --resource-path
       - /tmp/gocryptfs-decryptionkey/key
     healthcheck:
@@ -53,15 +55,55 @@ services:
     depends_on:
       attestation-agent:
         condition: service_healthy
+  
+  tng:
+    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/tng:1.0.2
+    volumes:
+      - attestation-agent-sock:/run/confidential-containers/attestation-agent/
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
+    command:
+    - tng
+    - launch
+    - --config-content
+    - |
+      {
+        "add_egress": [
+          {
+            "mapping": {
+              "in": {
+                "host": "0.0.0.0",
+                "port": 41000
+              },
+              "out": {
+                "host": "0.0.0.0",
+                "port": 9000
+              }
+            },
+            "attest": {
+              "aa_addr": "unix:///run/confidential-containers/attestation-agent/attestation-agent.sock"
+            }
+          }
+        ]
+      }
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl http://0.0.0.0:41000/tng/v1/healthcheck"]
+    #   interval: 3s
+    #   timeout: 5s
+    #   start_period: 20s
+    #   start_interval: 3s
+    #   retries: 5
+    depends_on:
+      attestation-agent:
+        condition: service_healthy
+        restart: false
 
   gocryptfs:
     build:
       dockerfile: Dockerfile.gocryptfs
     environment:
-      - BUCKET_NAME=${BUCKET_NAME}
       - MODEL_TYPE=${MODEL_TYPE}
-      - ACCESS_KEY=${ACCESS_KEY}
-      - ACCESS_SECRET=${ACCESS_SECRET}
     volumes:
       - /tmp/encrypted-model:/tmp/encrypted-model:shared
       - /tmp/plaintext-model:/tmp/plaintext-model:shared
@@ -85,6 +127,25 @@ services:
       confidential-data-hub:
         condition: service_healthy
         restart: true
+      # tng:
+      #   condition: service_healthy
+      #   restart: false
+
+  app:
+    build:
+      context: ../app
+      dockerfile: Dockerfile
+    ports:
+      - "9000:8000"  # 宿主机端口:容器端口
+    volumes:
+      - /tmp/plaintext-model:/app/model:shared
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    restart: unless-stopped
+    depends_on:
+      - tng
       # tng:
       #   condition: service_healthy
       #   restart: false
