@@ -17,34 +17,6 @@ According to the threat model, the first two steps occur on the user side, while
 
 ## Configuring and Starting Trustee
 
-### Enable Docker Experimental Features
-
-(Enabling Docker experimental features allows us to use oras)
-
-1. Edit the Docker Configuration File
-
-The Docker configuration file is typically located at `/etc/docker/daemon.json`. You can open this file with any text editor (such as `nano` or `vim`). If the file does not exist, you can create a new one.  
-
-```shell
-sudo vim /etc/docker/daemon.json
-```
-
-2. Add Experimental Features Configuration
-
-In the `daemon.json` file, add the following content to enable experimental features.
-
-```daemon.json
-{
-    "experimental": true
-}
-```
-
-3. Restart the Docker Service
-
-```shell
-sudo systemctl restart docker
-```
-
 ### Configure Alibaba Cloud PCCS
 
 1. Run the command below to automatically configure Alibaba Cloud PCCS for Alibaba Cloud ECS.

@@ -17,34 +17,6 @@
 
 ## 配置和启动Trustee
 
-### 启用Docker试验性功能
-
-（启用Docker试验性功能让我们可以使用oras）
-
-1. 编辑 Docker 配置文件
-
-Docker 的配置文件通常为`/etc/docker/daemon.json`。可以使用任意文本编辑器（如 `nano` 或 `vim`）打开该文件。如果文件不存在，可以创建一个新的文件。
-
-```shell
-sudo vim /etc/docker/daemon.json
-```
-
-2. 添加实验性功能配置
-
-在 `daemon.json` 文件中，添加以下内容以启用实验性功能。
-
-```daemon.json
-{
-    "experimental": true
-}
-```
-
-3. 重启 Docker 服务
-
-```shell
-sudo systemctl restart docker
-```
-
 ### 配置阿里云PCCS
 
 1. 运行下方命令即可为阿里云ECS自动配置阿里云PCCS。
