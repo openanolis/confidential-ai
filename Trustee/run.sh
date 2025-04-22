@@ -7,8 +7,8 @@ dnf install -y git wget unzip
 
 # 1. Setup Trustee
 REPO_URL=https://github.com/openanolis/trustee.git
-# TAG=v1.0.1
-COMMIT=17e0f5b356cbd1832d06d0021ad7abaa76767b9c
+TAG=v1.1.1
+# COMMIT=17e0f5b356cbd1832d06d0021ad7abaa76767b9c
 
 if [ ! -d "./trustee" ]; then
     if [ -n "${TAG}" ]; then
@@ -48,8 +48,8 @@ cd data
 
 if ! command -v gocryptfs >/dev/null 2>&1; then
     mkdir gocryptfs && cd gocryptfs
-    wget https://github.com/rfjakob/gocryptfs/releases/download/v2.4.0/gocryptfs_v2.4.0_linux-static_amd64.tar.gz \
-    tar xf gocryptfs_v2.4.0_linux-static_amd64.tar.gz \
+    wget https://github.com/rfjakob/gocryptfs/releases/download/v2.4.0/gocryptfs_v2.4.0_linux-static_amd64.tar.gz
+    tar xf gocryptfs_v2.4.0_linux-static_amd64.tar.gz
     sudo install -m 0755 ./gocryptfs /usr/local/bin
     cd .. && rm -rf gocryptfs
 fi
