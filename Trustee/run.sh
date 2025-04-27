@@ -66,17 +66,20 @@ fi
 
 cd mount
 
-if [ "${MODEL}" = "helloworld" ]; then
-    mkdir -p ./helloworld
-    echo "hello" > ./helloworld/hello.txt
-    echo "world" > ./helloworld/world.txt
-    cp -r ./helloworld ./plain
-elif [ "${MODEL}" = "Qwen-7B-Chat"]; then
-    # if [ ! -d "./Qwen-7B-Chat" ]; then
-    #     dnf install -y git-lfs
-    #     git lfs install && git clone https://www.modelscope.cn/qwen/Qwen-7B-Chat.git
+if [ "${MODEL}" = "DeepSeek-R1-Chat" ]; then
+    if [ ! -f "./plain/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf" ]; then
+        wget -c --progress=dot:giga --show-progress --tries=30 --timeout=30 --waitretry=15 -P ./plain \
+            https://modelscope.cn/models/unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/master/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf \
+            || { echo "model ${MODEL} download failed"; exit 1; }
+    fi
+    echo "model ${MODEL} download success."
+elif [ "${MODEL}" = "Qwen-7B-Instruct" ]; then
+    # if [ ! -f "./plain/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf" ]; then
+    #     wget -c --progress=dot:giga --show-progress --tries=30 --timeout=30 --waitretry=15 -P ./plain \
+    #         https://modelscope.cn/models/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/master/qwen2.5-7b-instruct-q4_k_m.gguf \
+    #         || { echo "model ${MODEL} download failed"; exit 1; }
     # fi
-    # cp -r ./Qwen-7B-Chat ./mount/plain
+    # echo "model ${MODEL} download success."
     echo "model ${MODEL} not supported."
     exit 1
 else
@@ -85,23 +88,16 @@ else
 fi
 
 mkdir -p ../model && \
-tar cvzf - -C ./cipher . | split -d -b 2G - "../model/${MODEL_FILE}.tar.gz.part"
+tar cvzf - -C ./cipher . | split -d -b 1G - "../model/${MODEL_FILE}.tar.gz.part"
 
 cd ..
 
-# 3. Upload encrypted model and password to KBS
+# 3. Upload password to KBS and set KBS policy
 KEY_PATH=${KBS_KEY_PATH}
-MODEL_DIR=${KBS_MODEL_DIR}
 TRUSTEE_URL=${TRUSTEE_ADDR}
 
 echo "upload '$PASSWORD_FILE' to KBS with path: $KEY_PATH"
 ./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource --path ${KEY_PATH} --resource-file ${PASSWORD_FILE}
-
-for part in ./model/*; do
-    filename=$(basename "$part")
-    echo "upload '$filename' to KBS with path: $MODEL_DIR$filename"
-    ./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource --path ${MODEL_DIR}${filename} --resource-file ./model/${filename}
-done
 
  # WARNING: "allow_all.rego" can only be used in dev environment
 POLICY_FILE="allow_all.rego"
@@ -112,4 +108,20 @@ default allow = true
 EOF
 ./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource-policy --policy-file ${POLICY_FILE}
 
-cd ..
+# 4. open encrypted model for web access
+MODEL_PORT=${ENCRYPT_MODEL_PORT}
+
+cd model
+
+if command -v python3 &> /dev/null; then
+    SERVER_CMD="python3 -m http.server $MODEL_PORT --bind 0.0.0.0"
+else
+    SERVER_CMD="python -m SimpleHTTPServer $MODEL_PORT --bind 0.0.0.0"
+fi
+
+echo "[+] Starting Temporary Web Service:"
+echo "    Directory: $(realpath $DIRECTORY)"
+echo "    Address: http://0.0.0.0:$MODEL_PORT"
+echo "    Stop: Ctrl+C"
+
+$SERVER_CMD

@@ -5,9 +5,9 @@
 本文档指导你验证Confidential-AI的基本流程，该流程包括以下几个步骤。
 
 1. 部署Trustee，作为用户控制的、保存机密数据的组件；
-2. 加密模型文件，上传该加密模型到Trustee，同时将加密密钥保存在Trustee；
+2. 加密模型文件，将该加密模型开放web访问，同时将加密密钥保存在Trustee；
 3. 部署Trustiflux，作为云端可信组件；
-4. 经过远程证明验证云端环境，从Trustee获取加密密钥，以及加密模型，将其解密后挂载在可信环境中。
+4. 经过远程证明验证云端环境，从Trustee获取加密密钥，并经过web获取加密模型，将其解密后挂载在可信环境中。
 
 根据威胁模型，前两个步骤在用户侧发生，后两个步骤在云端发生。不过为了方便演示，本文档展示的流程基于同一台阿里云TDX ECS，并且使用本地网络。
 
@@ -45,7 +45,7 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 
 2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustiflux侧保持一致。
 
-- `MODEL_TYPE`：模型类型，当前支持`helloworld`；
+- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`；
 - `GOCRYPTFS_PASSWORD`: 加密密钥字符串；
 - `KBS_KEY_PATH`: Trustee中加密密钥的路径；
 - `KBS_MODEL_DIR`: Trustee中加密模型的路径；
@@ -70,11 +70,13 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 
 2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustee侧保持一致。
 
-- `MODEL_TYPE`：模型类型，当前支持`helloworld`；
+- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`；
 - `GOCRYPTFS_PASSWORD`: 留空，将经过远程证明从Trustee获取；
 - `KBS_KEY_PATH`: Trustee中加密密钥的路径；
-- `KBS_MODEL_DIR`: Trustee中加密模型的路径；
-- `TRUSTEE_ADDRESS`：Trustee的服务地址。
+- `ENCRYPT_MODEL_IP`: Trustee侧文件Web服务的IP；
+- `ENCRYPT_MODEL_PORT`: Trustee侧文件Web服务的端口；
+- `TRUSTEE_ADDRESS`: Trustee的服务地址；
+- `TRUSTEE_AS_ADDR`: Trustee AS的服务地址。
 
 3. 进入Trustiflux文件夹，运行`run.sh`文件。
 
@@ -85,24 +87,13 @@ cd Confidential-AI/Trustiflux
 
 ## 请求模型应用
 
-在Trustee侧，执行下述命令，会基于TNG可信信道，向Trustiflux发起请求。
+在Trustee侧，访问如下网址，会基于TNG可信信道，向Trustiflux发起请求，并访问推理Web服务。
 
-```shell
-curl http://127.0.0.1:9001/
+```url
+http://127.0.0.1:9001/
 ```
 
-Trustiflux侧部署了示例web服务，会返回其中已解密的模型文件列表，如果CAI部署成功，则可以看到类似如下结果。
-
-```shell
-{
-  "timestamp": "2025-03-20T07:28:07.718523",
-  "total_files": 2,
-  "files": [
-    "helloworld/hello.txt",
-    "helloworld/world.txt"
-  ]
-}
-```
+Trustiflux侧部署了推理web服务，如果CAI部署成功，则可以访问到推理web服务界面。
 
 ## Troubleshooting
 
