@@ -100,8 +100,9 @@ services:
         restart: false
 
   gocryptfs:
-    build:
-      dockerfile: Dockerfile.gocryptfs
+    # build:
+    #   dockerfile: Dockerfile.gocryptfs
+    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/dev/test:trustiflux-gocryptfs-v0.1.0
     environment:
       - MODEL_TYPE=${MODEL_TYPE}
     volumes:
@@ -136,9 +137,9 @@ services:
       context: ../app
       dockerfile: Dockerfile
     ports:
-      - "9000:8000"  # 宿主机端口:容器端口
+      - "9000:7860"  # 宿主机端口:容器端口
     volumes:
-      - /tmp/plaintext-model:/app/model:shared
+      - /tmp/plaintext-model:/app/text-generation-webui/models/:shared
     cap_add:
       - SYS_ADMIN
     devices:

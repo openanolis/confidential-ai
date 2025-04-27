@@ -4,11 +4,6 @@
 
 ARG BASE_IMAGE=debian:stable-slim
 
-ARG BUCKET_NAME
-ARG MODEL_TYPE
-ARG ACCESS_KEY
-ARG ACCESS_SECRET
-
 FROM ${BASE_IMAGE}
 
 WORKDIR /usr/src
@@ -36,14 +31,6 @@ RUN mkdir gocryptfs && cd gocryptfs && \
     tar xf gocryptfs_v2.4.0_linux-static_amd64.tar.gz && \
     install -m 0755 ./gocryptfs /usr/local/bin && \
     cd .. && rm -rf gocryptfs
-
-# install ossutil
-RUN mkdir -p ossutil && cd ossutil && \
-    curl -o ossutil-2.0.4-beta.10251600-linux-amd64.zip https://gosspublic.alicdn.com/ossutil/v2-beta/2.0.4-beta.10251600/ossutil-2.0.4-beta.10251600-linux-amd64.zip && \
-    unzip ossutil-2.0.4-beta.10251600-linux-amd64.zip && \
-    cd ossutil-2.0.4-beta.10251600-linux-amd64 && \
-    chmod 755 ossutil && \
-    mv ossutil /usr/local/bin/ && ln -s /usr/local/bin/ossutil /usr/bin/ossutil
 
 # Copy binaries
 COPY gocryptfs-start.sh /usr/bin/start.sh

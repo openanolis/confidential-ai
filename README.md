@@ -44,11 +44,13 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
 2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustiflux-side configuration.
-- `MODEL_TYPE`: Model type, currently supports helloworld;
+- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`;
 - `GOCRYPTFS_PASSWORD`: Encryption key string;
 - `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
-- `KBS_MODEL_DIR`: Path to the encrypted model in Trustee;
-- `TRUSTEE_ADDRESS`: Service address of Trustee.
+- `ENCRYPT_MODEL_IP`: IP address of the file web service on Trustee side;
+- `ENCRYPT_MODEL_PORT`: Port of the file web service on Trustee side;
+- `TRUSTEE_ADDRESS`: Service address of Trustee;
+- `TRUSTEE_AS_ADDR`: Service address of Trustee AS.
 
 3. Navigate to the Trustee folder and run the `run.sh` file.
 
@@ -68,11 +70,13 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
 2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustee-side configuration.
-- `MODEL_TYPE`: Model type, currently supports helloworld;
+- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`;
 - `GOCRYPTFS_PASSWORD`: Leave empty; it will be obtained from Trustee via remote attestation;
 - `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
-- `KBS_MODEL_DIR`: Path to the encrypted model in Trustee;
-- `TRUSTEE_ADDRESS`: Service address of Trustee.
+- `ENCRYPT_MODEL_IP`: IP address of the file web service on Trustee side;
+- `ENCRYPT_MODEL_PORT`: Port of the file web service on Trustee side;
+- `TRUSTEE_ADDRESS`: Service address of Trustee;
+- `TRUSTEE_AS_ADDR`: Service address of Trustee AS.
 
 3. Navigate to the Trustiflux folder and run the `run.sh` file.  
 
@@ -83,24 +87,13 @@ cd Confidential-AI/Trustiflux
 
 ## Requesting Model Application
 
-On the Trustee side, execute the following command to send a request to Trustiflux via the TNG trusted channel:
+On the Trustee side, access the following URL to send a request to Trustiflux via the TNG trusted channel and access the inference web service:
 
-```shell
-curl http://127.0.0.1:9001/
+```url
+http://127.0.0.1:9001/
 ```
 
-The example web service deployed on the Trustiflux side will return a list of decrypted model files. If the CAI deployment is successful, you should see a response similar to the following:
-
-```shell
-{
-  "timestamp": "2025-03-20T07:28:07.718523",
-  "total_files": 2,
-  "files": [
-    "helloworld/hello.txt",
-    "helloworld/world.txt"
-  ]
-}
-```
+The inference web service deployed on the Trustiflux side will be accessible if the CAI deployment is successful.
 
 ## Troubleshooting
 
