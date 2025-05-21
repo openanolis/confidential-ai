@@ -44,7 +44,7 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
 2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustiflux-side configuration.
-- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`;
+- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`|`Qwen-7B-Instruct`;
 - `GOCRYPTFS_PASSWORD`: Encryption key string;
 - `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
 - `ENCRYPT_MODEL_IP`: IP address of the file web service on Trustee side;
@@ -70,7 +70,7 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
 2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustee-side configuration.
-- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`;
+- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`|`Qwen-7B-Instruct`;
 - `GOCRYPTFS_PASSWORD`: Leave empty; it will be obtained from Trustee via remote attestation;
 - `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
 - `ENCRYPT_MODEL_IP`: IP address of the file web service on Trustee side;
