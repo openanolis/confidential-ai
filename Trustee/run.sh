@@ -74,13 +74,12 @@ if [ "${MODEL}" = "DeepSeek-R1-Chat" ]; then
     fi
     echo "model ${MODEL} download success."
 elif [ "${MODEL}" = "Qwen-7B-Instruct" ]; then
-    # if [ ! -f "./plain/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf" ]; then
-    #     wget -c --progress=dot:giga --show-progress --tries=30 --timeout=30 --waitretry=15 -P ./plain \
-    #         https://modelscope.cn/models/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/master/qwen2.5-7b-instruct-q4_k_m.gguf \
-    #         || { echo "model ${MODEL} download failed"; exit 1; }
-    # fi
-    # echo "model ${MODEL} download success."
-    echo "model ${MODEL} not supported."
+    if [ ! -f "./plain/qwen2.5-7b-instruct-q4_k_m.gguf" ]; then
+        wget -c --progress=dot:giga --show-progress --tries=30 --timeout=30 --waitretry=15 -P ./plain \
+            https://modelscope.cn/models/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/master/qwen2.5-7b-instruct-q4_k_m.gguf \
+            || { echo "model ${MODEL} download failed"; exit 1; }
+    fi
+    echo "model ${MODEL} download success."
     exit 1
 else
     echo "model ${MODEL} not supported."

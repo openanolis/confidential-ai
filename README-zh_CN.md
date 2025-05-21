@@ -45,7 +45,7 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 
 2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustiflux侧保持一致。
 
-- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`；
+- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`|`Qwen-7B-Instruct`；
 - `GOCRYPTFS_PASSWORD`: 加密密钥字符串；
 - `KBS_KEY_PATH`: Trustee中加密密钥的路径；
 - `KBS_MODEL_DIR`: Trustee中加密模型的路径；
@@ -70,7 +70,7 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 
 2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustee侧保持一致。
 
-- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`；
+- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`|`Qwen-7B-Instruct`；
 - `GOCRYPTFS_PASSWORD`: 留空，将经过远程证明从Trustee获取；
 - `KBS_KEY_PATH`: Trustee中加密密钥的路径；
 - `ENCRYPT_MODEL_IP`: Trustee侧文件Web服务的IP；
