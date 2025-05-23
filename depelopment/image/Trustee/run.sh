@@ -80,7 +80,6 @@ elif [ "${MODEL}" = "Qwen-7B-Instruct" ]; then
             || { echo "model ${MODEL} download failed"; exit 1; }
     fi
     echo "model ${MODEL} download success."
-    exit 1
 else
     echo "model ${MODEL} not supported."
     exit 1
