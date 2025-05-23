@@ -1,117 +1,75 @@
-# 快速启动
+# Confidential AI
 
-## 前言
+Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务：无需暴露原始数据/模型，借助可信硬件、远程证明等技术，实现在不信任环境中保护用户隐私数据、训练集和生成式模型的全流程防护，同时正常调用云计算资源完成复杂AI推理和训练。
 
-本文档指导你验证Confidential-AI的基本流程，该流程包括以下几个步骤。
+<!-- [![CI Status](https://github.com/your-org/your-solution/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/your-solution/actions) -->
+<!-- [![Docker Pulls](https://img.shields.io/docker/pulls/your-image)](https://hub.docker.com/r/your-image) -->
+<!-- [![System Architecture](https://img.shields.io/badge/architecture-diagram-blueviolet)](docs/architecture.png) -->
 
-1. 部署Trustee，作为用户控制的、保存机密数据的组件；
-2. 加密模型文件，将该加密模型开放web访问，同时将加密密钥保存在Trustee；
-3. 部署Trustiflux，作为云端可信组件；
-4. 经过远程证明验证云端环境，从Trustee获取加密密钥，并经过web获取加密模型，将其解密后挂载在可信环境中。
+---
 
-根据威胁模型，前两个步骤在用户侧发生，后两个步骤在云端发生。不过为了方便演示，本文档展示的流程基于同一台阿里云TDX ECS，并且使用本地网络。
+## 目录
 
-## 环境准备
+- [核心组件](#核心组件)
+- [功能特性](#功能特性)
+- [快速部署](#快速部署)
+- [配置说明](#配置说明)
+- [许可证](#许可证)
+- [常见问题](#常见问题)
 
-- 阿里云TDX ECS：参考[构建TDX机密计算环境](https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment)中“创建TDX实例”章节，推荐通过控制台创建。
+---
 
-## 配置和启动Trustee
+## 核心组件
 
-### 配置阿里云PCCS
+**当前稳定版**：`v1.0.0` - 2025-06-01
+**核心升级**：首次发布 Confidential AI
 
-1. 运行下方命令即可为阿里云ECS自动配置阿里云PCCS。
+| 组件          | 版本     | 功能描述                    | 变更摘要 |
+|---------------|----------|----------------------------|-----------|
+| Trustiflux   | 1.1.0    | 集成CDH、AA，为机密计算容器提供资源安全管控与远程证明服务 | 新增AA/CDH的dracut模块支持<br>架构重构：RCAR协议迁移至CDH<br>安全强化：集成TPM证明模块 |
+| Trustee      | 1.1.3    | 包含用于验证机密计算TEE (Trust Execute Evironment) 和为其下发秘密数据的工具与组件 | 集成TPM私钥CA插件<br>新增认证策略查询API |
+| TNG          | 1.0.3    | 基于远程证明的可信网关，无需改造现有应用实现零信任架构的端到端加密通信 | - |
 
-```shell
-token=$(curl -s -X PUT -H "X-aliyun-ecs-metadata-token-ttl-seconds: 5" "http://100.100.100.200/latest/api/token")
-region_id=$(curl -s -H "X-aliyun-ecs-metadata-token: $token" http://100.100.100.200/latest/meta-data/region-id)
+**完整变更日志**
 
-# 配置PCCS_URL指向实例所在Region的PCCS
-PCCS_URL=https://sgx-dcap-server-vpc.${region_id}.aliyuncs.com/sgx/certification/v4/
-sudo bash -c 'cat > /etc/sgx_default_qcnl.conf' << EOF
-# PCCS server address
-PCCS_URL=${PCCS_URL}
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-EOF
+[Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
+[Trustee Releases](https://github.com/openanolis/trustee/releases)
+[TNG Releases](https://github.com/inclavare-containers/TNG/releases)
+---
+
+## 功能特性
+
+<!-- - **核心功能1**：描述 + 技术亮点（例如：基于TensorFlow Lite的实时推理）
+- **核心功能2**：异步任务处理 + 性能指标（例如：每秒处理10k+请求）
+- **扩展能力**：插件系统/自定义模块支持
+- **跨平台**：支持Windows/Linux/macOS/Docker -->
+
+---
+
+## 快速部署
+
+### 一键启动（需安装Docker）：
+```bash
+git clone https://github.com/your-org/your-solution.git
+cd your-solution
+docker-compose up -d
 ```
 
-### 运行Trustee
+---
 
-1. 下载Confidential-AI代码。
+## 配置说明
 
-```shell
-git clone https://github.com/inclavare-containers/Confidential-AI.git
-```
 
-2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustiflux侧保持一致。
+## 许可证
 
-- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`|`Qwen-7B-Instruct`；
-- `GOCRYPTFS_PASSWORD`: 加密密钥字符串；
-- `KBS_KEY_PATH`: Trustee中加密密钥的路径；
-- `KBS_MODEL_DIR`: Trustee中加密模型的路径；
-- `TRUSTEE_ADDRESS`：Trustee的服务地址。
+[![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)  
+本项目采用 Apache 2.0 许可证。
 
-3. 进入Trustee文件夹，运行`run.sh`文件。
+## 常见问题
 
-```shell
-cd Confidential-AI/Trustee
-./run.sh
-```
+<!-- Q: 如何处理内存不足问题？
+A: 尝试调整config.yaml中的memory_limit参数或使用分块处理模式
 
-## 配置和启动Trustiflux
+Q: 是否支持ARM架构？
+A: 自v2.1.0起提供实验性支持 -->
 
-### 运行Trustiflux
-
-1. 下载Confidential-AI代码。
-
-```shell
-git clone https://github.com/inclavare-containers/Confidential-AI.git
-```
-
-2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustee侧保持一致。
-
-- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`|`Qwen-7B-Instruct`；
-- `GOCRYPTFS_PASSWORD`: 留空，将经过远程证明从Trustee获取；
-- `KBS_KEY_PATH`: Trustee中加密密钥的路径；
-- `ENCRYPT_MODEL_IP`: Trustee侧文件Web服务的IP；
-- `ENCRYPT_MODEL_PORT`: Trustee侧文件Web服务的端口；
-- `TRUSTEE_ADDRESS`: Trustee的服务地址；
-- `TRUSTEE_AS_ADDR`: Trustee AS的服务地址。
-
-3. 进入Trustiflux文件夹，运行`run.sh`文件。
-
-```shell
-cd Confidential-AI/Trustiflux
-./run.sh
-```
-
-## 请求模型应用
-
-在Trustee侧，访问如下网址，会基于TNG可信信道，向Trustiflux发起请求，并访问推理Web服务。
-
-```url
-http://127.0.0.1:9001/
-```
-
-Trustiflux侧部署了推理web服务，如果CAI部署成功，则可以访问到推理web服务界面。
-
-## Troubleshooting
-
-1. 镜像拉取缓慢甚至失败
-
-基于阿里云ACR配置镜像加速，参考官方镜像加速。
-
-2. 自动配置阿里云PCCS失败
-
-可以手动配置。如果你根据环境准备中的指导正确创建阿里云TDX ECS，你的实例所属地域应为华北2（北京），即`cn-beijing`。手动创建`/etc/sgx_default_qcnl.conf`文件，并写入下述内容即可。
-
-```shell
-# PCCS server address
-PCCS_URL=https://sgx-dcap-server.cn-beijing.aliyuncs.com/sgx/certification/v4/
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-```
-
-3. 运行run.sh失败
-
-先运行同目录下的`clean.sh`文件，再运行`run.sh`。
