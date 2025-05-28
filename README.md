@@ -1,117 +1,76 @@
-# Quick Start
+# Confidential AI
 
-## Introduction
+The Confidential AI open-source project enables developers to securely execute sensitive AI tasks in the cloud: without exposing raw data/models, it leverages trusted hardware and remote attestation technologies to protect user privacy data, training sets, and generative models throughout their lifecycle while allowing normal utilization of cloud computing resources for complex AI inference and training.
 
-Quick start guides you through the basic verification process of Confidential-AI, which includes the following steps:
+<!-- [![CI Status](https://github.com/your-org/your-solution/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/your-solution/actions) -->
+<!-- [![Docker Pulls](https://img.shields.io/docker/pulls/your-image)](https://hub.docker.com/r/your-image) -->
+<!-- [![System Architecture](https://img.shields.io/badge/architecture-diagram-blueviolet)](docs/architecture.png) -->
 
-1. Deploying Trustee as a user-controlled component that stores sensitive data.
-2. Encrypting the model file, uploading the encrypted model to Trustee, and saving the encryption key in Trustee.
-3. Deploying Trustiflux as a trusted component in the cloud.
-4. Verifying the cloud environment through remote attestation, obtaining the encryption key and the encrypted model from Trustee, and decrypting the model to mount in a trusted environment.
+---
 
-According to the threat model, the first two steps occur on the user side, while the last two steps happen in the cloud. However, for the sake of demonstration, the process shown in this document is based on the same Alibaba Cloud TDX ECS and utilizes a local network.
+## Core Components
 
-## Environment Preparation
+**Current Stable Version**: `v1.0.0` - 2025-06-01
+**Core Update**: First release of Confidential AI
 
-- Alibaba Cloud TDX ECS: Refer to the “Creating TDX Instances” section in [TDX Confidential Computing Environment guide](https://help.aliyun.com/zh/ecs/user-guide/build-a-tdx-confidential-computing-environment) and it's recommended to create it via the console.
+| Component   | Version | Function Description                          | Change Summary |
+|-------------|---------|-----------------------------------------------|----------------|
+| Trustiflux  | 1.1.0   | Integrates CDH/AA to provide resource security management and remote attestation services for confidential computing containers | Added AA/CDH dracut module support<br>Architecture restructured: RACR protocol migrated to CDH<br>Security enhancements: Integrated TPM attestation module |
+| Trustee     | 1.1.3   | Tools and components for verifying confidential computing TEE (Trust Execution Environment) and secret data delivery | Integrated TPM private key CA plugin<br>Added authentication policy query API |
+| TNG         | 1.0.3   | Trusted gateway based on remote attestation, enabling end-to-end encrypted communication for zero-trust architecture without application modifications | - |
 
-## Configuring and Starting Trustee
+**Full Change Log**
 
-### Configure Alibaba Cloud PCCS
+[Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
+[Trustee Releases](https://github.com/openanolis/trustee/releases)
+[TNG Releases](https://github.com/inclavare-containers/TNG/releases)
 
-1. Run the command below to automatically configure Alibaba Cloud PCCS for Alibaba Cloud ECS.
+---
 
-```shell
-token=$(curl -s -X PUT -H "X-aliyun-ecs-metadata-token-ttl-seconds: 5" "http://100.100.100.200/latest/api/token")
-region_id=$(curl -s -H "X-aliyun-ecs-metadata-token: $token" http://100.100.100.200/latest/meta-data/region-id)
+## Features
 
-# Set PCCS_URL to point to the PCCS in the instance's region
-PCCS_URL=https://sgx-dcap-server-vpc.${region_id}.aliyuncs.com/sgx/certification/v4/
-sudo bash -c 'cat > /etc/sgx_default_qcnl.conf' << EOF
-# PCCS server address
-PCCS_URL=${PCCS_URL}
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-EOF
-```
+<!-- - **Core Feature 1**: Description + Technical Highlights (e.g., Real-time inference based on TensorFlow Lite)
+- **Core Feature 2**: Asynchronous task processing + Performance metrics (e.g., 10k+ requests per second)
+- **Expansion Capabilities**: Plugin system/Custom module support
+- **Cross-platform**: Supports Windows/Linux/macOS/Docker -->
 
-### Run Trustee
+---
 
-1. Download the Confidential-AI code.
+## Quick Deployment
 
-```shell
-git clone https://github.com/inclavare-containers/Confidential-AI.git
-```
+### Docker Deployment:
 
-2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustiflux-side configuration.
-- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`|`Qwen-7B-Instruct`;
-- `GOCRYPTFS_PASSWORD`: Encryption key string;
-- `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
-- `ENCRYPT_MODEL_IP`: IP address of the file web service on Trustee side;
-- `ENCRYPT_MODEL_PORT`: Port of the file web service on Trustee side;
-- `TRUSTEE_ADDRESS`: Service address of Trustee;
-- `TRUSTEE_AS_ADDR`: Service address of Trustee AS.
+1. For rapid validation of Confidential-AI's end-to-end workflow, we provide a one-click Docker-based deployment solution. See [Docker Deployment Guide](deployment/docker/README.md). This solution applies to:
 
-3. Navigate to the Trustee folder and run the `run.sh` file.
+- Hybrid environment simulation: Process covers user side (Trustee key management) and cloud side (Trustiflux trusted inference) collaboration. Full simulation can be completed in a single TDX instance through Docker, suitable for development debugging or demonstration verification.
+- Out-of-the-box: Containerized packaging of dependency environments and configuration scripts avoids deployment issues caused by environment differences, ensuring process consistency.
 
-```shell
-cd Confidential-AI/Trustee
-./run.sh
-```
+2. Core Requirements
 
-## Configuring and Starting Trustiflux
+- Confidential computing environment supporting SGX (e.g., Alibaba Cloud TDX ECS).
+- Docker and basic command-line tools installed.
 
-### Run Trustiflux
+3. Advantages
 
-1. Download the Confidential-AI code.
+- Security enhancement: Combines SGX remote attestation technology to ensure keys are decrypted only in verified trusted environments, protecting model privacy.
+- Agile delivery: Pre-configured automation scripts handle complex steps like PCCS configuration and service discovery, reducing onboarding costs.
+- Environment agnosticism: Container images can be rapidly migrated across any cloud environment supporting SGX, adapting to multi-cloud/hybrid cloud architectures.
 
-```shell
-git clone https://github.com/inclavare-containers/Confidential-AI.git
-```
+### RPM Deployment:
 
-2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustee-side configuration.
-- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`|`Qwen-7B-Instruct`;
-- `GOCRYPTFS_PASSWORD`: Leave empty; it will be obtained from Trustee via remote attestation;
-- `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
-- `ENCRYPT_MODEL_IP`: IP address of the file web service on Trustee side;
-- `ENCRYPT_MODEL_PORT`: Port of the file web service on Trustee side;
-- `TRUSTEE_ADDRESS`: Service address of Trustee;
-- `TRUSTEE_AS_ADDR`: Service address of Trustee AS.
+Under construction...
 
-3. Navigate to the Trustiflux folder and run the `run.sh` file.  
+---
 
-```shell
-cd Confidential-AI/Trustiflux
-./run.sh
-```
+## License
 
-## Requesting Model Application
+[![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)  
+This project uses the Apache 2.0 license.
 
-On the Trustee side, access the following URL to send a request to Trustiflux via the TNG trusted channel and access the inference web service:
+## FAQ
 
-```url
-http://127.0.0.1:9001/
-```
+<!-- Q: How to handle memory shortages?
+A: Try adjusting the memory_limit parameter in config.yaml or use chunked processing mode
 
-The inference web service deployed on the Trustiflux side will be accessible if the CAI deployment is successful.
-
-## Troubleshooting
-
-1. Image Pulling is Slow or Fails
-
-Configure image acceleration based on Alibaba Cloud ACR. Refer to the official image acceleration documentation.
-
-2. Failed to Automatically Configure Alibaba Cloud PCCS
-
-You can configure it manually. If you have correctly created the Alibaba Cloud TDX ECS according to the preparation instructions, the region for your instance should be North China 2 (Beijing), i.e., `cn-beijing`. Manually create the `/etc/sgx_default_qcnl.conf` file and write the following content.
-
-```shell
-# PCCS server address
-PCCS_URL=https://sgx-dcap-server.cn-beijing.aliyuncs.com/sgx/certification/v4/
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-```
-
-3. Failed to Run run.sh
-
-First run the `clean.sh` file in the same directory, then run `run.sh`.
+Q: Is ARM architecture supported?
+A: Experimental support available from v2.1.0 -->

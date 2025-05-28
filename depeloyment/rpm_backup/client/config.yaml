@@ -1,0 +1,20 @@
+network_config:
+  proxies: [...]
+
+resource_writer:
+  - name: "model"
+    type: "web_file"
+    params:
+      model_type: "DeepSeek-R1-Chat"
+      directory: "/app/local/model"
+      port: 9090
+
+secret_writer:
+  - name: "model_password"
+    type: "trustee"
+    params:
+      path: "test/cai/password"
+      kbs_address: "http://0.0.0.0:8080"
+      private_key_file: "/etc/trustee/private.key"
+      resource_file: "/app/local/password"
+      policy_file: "/app/local/policy.rego"
