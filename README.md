@@ -10,7 +10,7 @@ The Confidential AI open-source project enables developers to securely execute s
 
 ## 目录
 
-- [Core Components](#Core Components)
+- [Components](#Components)
 - [Features](#Features)
 - [Deployment](#Deployment)
 - [License](#许可证)
@@ -18,7 +18,7 @@ The Confidential AI open-source project enables developers to securely execute s
 
 ---
 
-## Core Components
+## Components
 
 **Current Stable Version**: `v1.0.0` - 2025-06-01
 **Core Update**: First release of Confidential AI
