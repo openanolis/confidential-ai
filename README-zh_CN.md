@@ -13,7 +13,6 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 - [核心组件](#核心组件)
 - [功能特性](#功能特性)
 - [快速部署](#快速部署)
-- [配置说明](#配置说明)
 - [许可证](#许可证)
 - [常见问题](#常见问题)
 
@@ -32,9 +31,10 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 
 **完整变更日志**
 
-[Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
-[Trustee Releases](https://github.com/openanolis/trustee/releases)
-[TNG Releases](https://github.com/inclavare-containers/TNG/releases)
+- [Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
+- [Trustee Releases](https://github.com/openanolis/trustee/releases)
+- [TNG Releases](https://github.com/inclavare-containers/TNG/releases)
+
 ---
 
 ## 功能特性
@@ -74,7 +74,8 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 
 ## 许可证
 
-[![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)  
+[![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 本项目采用 Apache 2.0 许可证。
 
 ## 常见问题

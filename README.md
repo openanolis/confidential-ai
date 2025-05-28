@@ -8,6 +8,16 @@ The Confidential AI open-source project enables developers to securely execute s
 
 ---
 
+## 目录
+
+- [Core Components](#Core Components)
+- [Features](#Features)
+- [Deployment](#Deployment)
+- [License](#许可证)
+- [FAQ](#FAQ)
+
+---
+
 ## Core Components
 
 **Current Stable Version**: `v1.0.0` - 2025-06-01
@@ -21,9 +31,9 @@ The Confidential AI open-source project enables developers to securely execute s
 
 **Full Change Log**
 
-[Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
-[Trustee Releases](https://github.com/openanolis/trustee/releases)
-[TNG Releases](https://github.com/inclavare-containers/TNG/releases)
+- [Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
+- [Trustee Releases](https://github.com/openanolis/trustee/releases)
+- [TNG Releases](https://github.com/inclavare-containers/TNG/releases)
 
 ---
 
@@ -36,7 +46,7 @@ The Confidential AI open-source project enables developers to securely execute s
 
 ---
 
-## Quick Deployment
+## Deployment
 
 ### Docker Deployment:
 
@@ -64,7 +74,8 @@ Under construction...
 
 ## License
 
-[![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)  
+[![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 This project uses the Apache 2.0 license.
 
 ## FAQ
