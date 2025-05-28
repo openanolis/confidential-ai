@@ -48,17 +48,29 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 
 ## 快速部署
 
-### 一键启动（需安装Docker）：
-```bash
-git clone https://github.com/your-org/your-solution.git
-cd your-solution
-docker-compose up -d
-```
+### docker部署：
+
+1. 如需快速验证 Confidential-AI 的端到端流程，我们提供了基于 Docker 的一键化部署方案，详见 [Docker 部署指南](deployment/docker/README-zh_CN.md)。该方案适用于以下场景：
+
+- 混合环境模拟：流程涵盖用户侧（Trustee 密钥管理）与云端（Trustiflux 可信推理）的协作，通过 Docker 可在单台 TDX 实例中完整模拟，便于开发调试或演示验证。
+- 开箱即用：容器化封装依赖环境和配置脚本，避免因环境差异导致的部署问题，确保流程一致性。
+
+2. 核心要求
+
+- 支持 SGX 的机密计算环境（如阿里云 TDX ECS）。
+- 已安装 Docker 及基础命令行工具。
+
+3. 优势特性
+
+- 安全增强：结合 SGX 远程证明技术，确保密钥仅在经过验证的可信环境中解密，保障模型隐私。
+- 敏捷交付：预置自动化脚本处理 PCCS 配置、服务发现等复杂步骤，降低上手成本。
+- 环境无绑定：容器镜像可在任意支持 SGX 的云环境中快速迁移，适配多云/混合云架构。
+
+### rpm部署：
+
+施工中...
 
 ---
-
-## 配置说明
-
 
 ## 许可证
 
