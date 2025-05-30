@@ -57,7 +57,7 @@ decrypt_model() {
     local model_dir="${1}"
     local model_file="${2}"
     local password_file="${3}"
-    local base_dir="/home/daniel/confidential-ai/depeloyment/rpm/trustiflux"
+    local base_dir="/tmp/confidential-ai/rpm/trustiflux"
     local mount_dir="${base_dir}/mount"
     local cipher_dir="${mount_dir}/cipher"
     local plain_dir="${mount_dir}/plain"
