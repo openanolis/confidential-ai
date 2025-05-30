@@ -71,15 +71,14 @@ download_and_encrypt_model() {
     local model_type="${1}"
     local model_dir="${2}"
     local password_file="${3}"
-    local base_dir="/home/daniel/confidential-ai/depeloyment/rpm/trustee"
+    local base_dir="/tmp/confidential-ai/rpm/trustee"
     local mount_dir="${base_dir}/mount"
     local cipher_dir="${mount_dir}/cipher"
     local plain_dir="${mount_dir}/plain"
 
     # 模型URL映射
     declare -A model_urls=(
-        # ["DeepSeek-R1-Chat"]="https://modelscope.cn/models/unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/master/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf"
-        ["DeepSeek-R1-Chat"]="https://wordpress.org/latest.zip"
+        ["DeepSeek-R1-Chat"]="https://modelscope.cn/models/unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/master/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf"
         ["Qwen-7B-Instruct"]="https://modelscope.cn/models/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/master/qwen2.5-7b-instruct-q4_k_m.gguf"
     )
     local wget_opts="--progress=dot:giga --show-progress --tries=30 --timeout=300 --waitretry=15"
@@ -107,6 +106,7 @@ download_and_encrypt_model() {
 
     # 初始化加密文件系统（无中间密码文件）
     (
+        local password=$(cat ${password_file})
         cd "${base_dir}" || exit 1
         if [[ -d "${mount_dir}" ]]; then
             fusermount -u "${plain_dir}"
@@ -116,8 +116,8 @@ download_and_encrypt_model() {
         
         if [[ ! -d "${cipher_dir}" ]]; then
             mkdir -p "${cipher_dir}" "${plain_dir}" || exit 1
-            cat ${password_file} | gocryptfs -init ${cipher_dir} || exit 1
-            cat ${password_file} | gocryptfs ${cipher_dir} ${plain_dir} || exit 1
+            echo ${password} | gocryptfs -init ${cipher_dir} || exit 1
+            echo ${password} | gocryptfs ${cipher_dir} ${plain_dir} || exit 1
         fi
     ) || { echo "Filesystem initialization failed"; return 1; }
 
