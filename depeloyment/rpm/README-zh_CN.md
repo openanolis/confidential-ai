@@ -87,3 +87,11 @@ rm -rf /tmp/confidential-ai/rpm/trustee/mount
 
 # 重新执行部署
 ./run_trustee.sh
+```
+
+## 常见问题
+
+1. 使用 pip3 安装依赖失败
+问题现象：可能报错找不到符合要求的版本，或连接超时等。
+问题原因：通常是网络问题，导致依赖下载失败或无法访问。
+解决方法：可以通过使用国内镜像源加速下载来解决。例如使用阿里源下载：`pip3 install -i https://mirrors.aliyun.com/pypi/simple/ your-packeage`

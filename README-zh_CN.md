@@ -6,8 +6,6 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 <!-- [![Docker Pulls](https://img.shields.io/docker/pulls/your-image)](https://hub.docker.com/r/your-image) -->
 <!-- [![System Architecture](https://img.shields.io/badge/architecture-diagram-blueviolet)](docs/architecture.png) -->
 
----
-
 ## 目录
 
 - [核心组件](#核心组件)
@@ -15,8 +13,6 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 - [快速部署](#快速部署)
 - [许可证](#许可证)
 - [常见问题](#常见问题)
-
----
 
 ## 核心组件
 
@@ -35,16 +31,12 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 - [Trustee Releases](https://github.com/openanolis/trustee/releases)
 - [TNG Releases](https://github.com/inclavare-containers/TNG/releases)
 
----
-
 ## 功能特性
 
 <!-- - **核心功能1**：描述 + 技术亮点（例如：基于TensorFlow Lite的实时推理）
 - **核心功能2**：异步任务处理 + 性能指标（例如：每秒处理10k+请求）
 - **扩展能力**：插件系统/自定义模块支持
 - **跨平台**：支持Windows/Linux/macOS/Docker -->
-
----
 
 ## 快速部署
 
@@ -57,32 +49,35 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 
 2. 核心要求
 
-- 支持 SGX 的机密计算环境（如阿里云 TDX ECS）。
+- 支持 TDX 的机密计算环境（如阿里云 TDX ECS）。
 - 已安装 Docker 及基础命令行工具。
 
 3. 优势特性
 
-- 安全增强：结合 SGX 远程证明技术，确保密钥仅在经过验证的可信环境中解密，保障模型隐私。
+- 安全增强：结合 TDX 远程证明技术，确保密钥仅在经过验证的可信环境中解密，保障模型隐私。
 - 敏捷交付：预置自动化脚本处理 PCCS 配置、服务发现等复杂步骤，降低上手成本。
-- 环境无绑定：容器镜像可在任意支持 SGX 的云环境中快速迁移，适配多云/混合云架构。
+- 环境无绑定：容器镜像可在任意支持 TDX 的云环境中快速迁移，适配多云/混合云架构。
 
 ### rpm部署：
 
-施工中...
+1. 基于 RPM 包的生产级部署方案，详见 [RPM 部署指南](deployment/rpm/README-zh_CN.md)，适用于以下场景：
 
----
+- **生产环境部署**：通过标准软件包管理器进行版本控制和依赖管理。
+- **硬件专用环境**：直接在支持 TDX 的物理机或虚拟机上部署，获得更优性能。
+
+2. 核心要求
+
+- 支持 TDX 的机密计算环境（如阿里云 TDX ECS）。
+- 操作系统为 Alibaba Cloud Linux 3（AL3）。
+
+3. 优势特性
+
+- **标准包管理**：通过 RPM 包进行安装/升级/卸载操作，符合企业运维规范。
+- **自动化流程**：预置脚本自动处理密钥管理、服务注册等复杂流程。
+- **灵活扩展**：支持自定义配置参数，可通过修改 `config_trustee.yaml` 和 `config_trustiflux.yaml` 调整部署策略。
 
 ## 许可证
 
 [![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 本项目采用 Apache 2.0 许可证。
-
-## 常见问题
-
-<!-- Q: 如何处理内存不足问题？
-A: 尝试调整config.yaml中的memory_limit参数或使用分块处理模式
-
-Q: 是否支持ARM架构？
-A: 自v2.1.0起提供实验性支持 -->
-

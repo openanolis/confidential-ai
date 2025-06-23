@@ -1,6 +1,6 @@
-depelopment/image/Trustee/trustee
-depelopment/image/Trustee/data
-depelopment/image/Trustiflux/data
+depelopment/docker/Trustee/trustee
+depelopment/docker/Trustee/data
+depelopment/docker/Trustiflux/data
 
 depelopment/rpm/trustee/model
 depelopment/rpm/trustee/mount

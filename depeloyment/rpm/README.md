@@ -87,3 +87,12 @@ rm -rf /tmp/confidential-ai/rpm/trustee/mount
 
 # Re-deploy
 ./run_trustee.sh
+```
+
+## FAQ
+
+1. Installation of dependencies using pip3 failed
+Problem symptoms: May report errors such as no matching version found or connection timeout.
+Cause of the issue: Typically network issues, leading to failed dependency downloads or inaccessible resources.
+Solution: This can be resolved by using a domestic mirror source to accelerate downloading. For example, download using the Aliyun source:
+`pip3 install -i https://mirrors.aliyun.com/pypi/simple/ your-packeage`

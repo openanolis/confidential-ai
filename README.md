@@ -60,7 +60,7 @@ The Confidential AI open-source project enables developers to securely execute s
 - Confidential computing environment supporting SGX (e.g., Alibaba Cloud TDX ECS).
 - Docker and basic command-line tools installed.
 
-3. Advantages
+3. Key Advantages
 
 - Security enhancement: Combines SGX remote attestation technology to ensure keys are decrypted only in verified trusted environments, protecting model privacy.
 - Agile delivery: Pre-configured automation scripts handle complex steps like PCCS configuration and service discovery, reducing onboarding costs.
@@ -68,7 +68,21 @@ The Confidential AI open-source project enables developers to securely execute s
 
 ### RPM Deployment:
 
-Under construction...
+1. Production-grade deployment solution based on RPM packages. For details, see [RPM Deployment Guide](deployment/rpm/README.md). Applicable to the following scenarios:
+
+- Production Environment Deployment: Version control and dependency management through standard package managers.
+- Hardware-Dedicated Environments: Deploy directly on TDX-supported physical or virtual machines for optimal performance.
+
+2. Core Requirements
+
+- TDX-supported confidential computing environment (e.g., Alibaba Cloud TDX ECS).
+- Operating system: Alibaba Cloud Linux 3 (AL3).
+
+3. Key Advantages
+
+- Standard Package Management: Install/upgrade/uninstall via RPM packages, compliant with enterprise operation standards.
+- Automated Workflows: Preconfigured scripts automatically handle complex processes like key management and service registration.
+- Flexible Extensibility: Support for custom configuration parameters by modifying `config_trustee.yaml` and `config_trustiflux.yaml` to adjust deployment strategies.
 
 ---
 
@@ -77,11 +91,3 @@ Under construction...
 [![Apache 2.0 License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This project uses the Apache 2.0 license.
-
-## FAQ
-
-<!-- Q: How to handle memory shortages?
-A: Try adjusting the memory_limit parameter in config.yaml or use chunked processing mode
-
-Q: Is ARM architecture supported?
-A: Experimental support available from v2.1.0 -->
