@@ -6,7 +6,7 @@ The Confidential AI open-source project enables developers to securely execute s
 <!-- [![Docker Pulls](https://img.shields.io/docker/pulls/your-image)](https://hub.docker.com/r/your-image) -->
 <!-- [![System Architecture](https://img.shields.io/badge/architecture-diagram-blueviolet)](docs/architecture.png) -->
 
-## 目录
+## Table of Contents
 
 - [Components](#Components)
 - [Features](#Features)
