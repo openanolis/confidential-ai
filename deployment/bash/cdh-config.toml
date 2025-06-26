@@ -1,0 +1,7 @@
+[kbc]
+name = "cc_kbc"
+url = "http://8.218.2.223:8080"
+
+[[credentials]]
+resource_uri = "kbs:///default/aliyun/ecs_ram_role"
+path = "/run/confidential-containers/cdh/kms-credential/aliyun/ecsRamRole.json"
