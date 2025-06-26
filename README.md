@@ -6,8 +6,6 @@ The Confidential AI open-source project enables developers to securely execute s
 <!-- [![Docker Pulls](https://img.shields.io/docker/pulls/your-image)](https://hub.docker.com/r/your-image) -->
 <!-- [![System Architecture](https://img.shields.io/badge/architecture-diagram-blueviolet)](docs/architecture.png) -->
 
----
-
 ## 目录
 
 - [Components](#Components)
@@ -15,8 +13,6 @@ The Confidential AI open-source project enables developers to securely execute s
 - [Deployment](#Deployment)
 - [License](#许可证)
 - [FAQ](#FAQ)
-
----
 
 ## Components
 
@@ -35,16 +31,12 @@ The Confidential AI open-source project enables developers to securely execute s
 - [Trustee Releases](https://github.com/openanolis/trustee/releases)
 - [TNG Releases](https://github.com/inclavare-containers/TNG/releases)
 
----
-
 ## Features
 
 <!-- - **Core Feature 1**: Description + Technical Highlights (e.g., Real-time inference based on TensorFlow Lite)
 - **Core Feature 2**: Asynchronous task processing + Performance metrics (e.g., 10k+ requests per second)
 - **Expansion Capabilities**: Plugin system/Custom module support
 - **Cross-platform**: Supports Windows/Linux/macOS/Docker -->
-
----
 
 ## Deployment
 
@@ -83,8 +75,6 @@ The Confidential AI open-source project enables developers to securely execute s
 - Standard Package Management: Install/upgrade/uninstall via RPM packages, compliant with enterprise operation standards.
 - Automated Workflows: Preconfigured scripts automatically handle complex processes like key management and service registration.
 - Flexible Extensibility: Support for custom configuration parameters by modifying `config_trustee.yaml` and `config_trustiflux.yaml` to adjust deployment strategies.
-
----
 
 ## License
 
