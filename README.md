@@ -11,8 +11,7 @@ The Confidential AI open-source project enables developers to securely execute s
 - [Components](#Components)
 - [Features](#Features)
 - [Deployment](#Deployment)
-- [License](#许可证)
-- [FAQ](#FAQ)
+- [License](#License)
 
 ## Components
 
