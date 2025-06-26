@@ -48,14 +48,14 @@ The Confidential AI open-source project enables developers to securely execute s
 
 2. Core Requirements
 
-- Confidential computing environment supporting SGX (e.g., Alibaba Cloud TDX ECS).
+- Confidential computing environment supporting TDX (e.g., Alibaba Cloud TDX ECS).
 - Docker and basic command-line tools installed.
 
 3. Key Advantages
 
-- Security enhancement: Combines SGX remote attestation technology to ensure keys are decrypted only in verified trusted environments, protecting model privacy.
+- Security enhancement: Combines TDX remote attestation technology to ensure keys are decrypted only in verified trusted environments, protecting model privacy.
 - Agile delivery: Pre-configured automation scripts handle complex steps like PCCS configuration and service discovery, reducing onboarding costs.
-- Environment agnosticism: Container images can be rapidly migrated across any cloud environment supporting SGX, adapting to multi-cloud/hybrid cloud architectures.
+- Environment agnosticism: Container images can be rapidly migrated across any cloud environment supporting TDX, adapting to multi-cloud/hybrid cloud architectures.
 
 ### RPM Deployment:
 
