@@ -25,6 +25,7 @@ _CI-validated version combinations_
 
 | Trustee | Trustiflux | TNG | test status | timestamp | Remark |
 |---------|------------|-----|-------------|-----------|--------|
+| 1.5.2 | 1.3.1 | 2.2.4 | ✅ PASS | 2025-08-29 | - |
 | 1.5.1 | 1.3.1 | 2.2.4 | ✅ PASS | 2025-08-12 | ConfidentialAI - v1.1.0 |
 | 1.5.1 | 1.2.1 | 2.2.4 | ✅ PASS | 2025-08-13 | - |
 | 1.4.3 | 1.3.1 | 2.2.4 | ✅ PASS | 2025-08-13 | - |
