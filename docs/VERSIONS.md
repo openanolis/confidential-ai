@@ -14,10 +14,10 @@
 
 _Community-verified release points maintained by contributors_
 
-| Release Tag | Component Combination | Updated Date | Key Changes |
-|-------------|------------------------------|--------------|--------------------------------------|
-| v1.1.0      | Trustee:1.5.1 + Trustiflux:1.3.1 + TNG:2.2.4  | 2025-08-12   | • Enhance trusted computing (TPM/TDX/GPU attestation), optimizing gateway performance (in-memory SQLite/HTTPS), and refining APIs (DELETE method, frontend crypto). <br>• Evolve from foundational modular setup (dracut/TPM) to enhanced attestation (TDX/GPU) and configurable service integration. <br>• Transitioned to cross-platform stability (ARM/x86_64), expanded network capabilities (SOCKS5/HTTP proxy), and streamlined deployment processes. |
-| v1.0.0      | Trustee:1.1.3 + Trustiflux:1.1.0 + TNG:1.0.3  | 2025-06-01   | • Initial community release |
+| Release Tag | Component Combination | Updated Date |
+|-------------|------------------------------|--------------|
+| v1.1.0      | Trustee:1.5.1 + Trustiflux:1.3.1 + TNG:2.2.4  | 2025-08-01   |
+| v1.0.0      | Trustee:1.1.3 + Trustiflux:1.1.0 + TNG:1.0.3  | 2025-06-01   |
 
 ## Compatibility Matrix
 

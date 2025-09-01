@@ -9,28 +9,24 @@ Confidential AI开源项目让开发者能够在云端安全执行敏感AI任务
 ## 目录
 
 - [核心组件](#核心组件)
-- [功能特性](#功能特性)
 - [快速部署](#快速部署)
 - [许可证](#许可证)
 
 ## 核心组件
 
-**当前稳定版**：`v1.0.0` - 2025-06-01
-**核心升级**：首次发布 Confidential AI
+**当前稳定版**：`v1.1.0` - 2025-08-01
 
-| 组件          | 版本     | 功能描述                    | 变更摘要 |
+| 组件          | 版本     | 功能描述                    | 完整变更日志 |
 |---------------|----------|----------------------------|-----------|
-| Trustiflux   | 1.1.0    | 集成CDH、AA，为机密计算容器提供资源安全管控与远程证明服务 | 新增AA/CDH的dracut模块支持<br>架构重构：RCAR协议迁移至CDH<br>安全强化：集成TPM证明模块 |
-| Trustee      | 1.1.3    | 包含用于验证机密计算TEE (Trust Execute Evironment) 和为其下发秘密数据的工具与组件 | 集成TPM私钥CA插件<br>新增认证策略查询API |
-| TNG          | 1.0.3    | 基于远程证明的可信网关，无需改造现有应用实现零信任架构的端到端加密通信 | - |
+| Trustiflux   | 1.3.1    | 集成CDH、AA，为机密计算容器提供资源安全管控与远程证明服务 | [Trustiflux 发型版本](https://github.com/inclavare-containers/guest-components/releases) |
+| Trustee      | 1.5.1    | 包含用于验证机密计算TEE (Trust Execute Evironment) 和为其下发秘密数据的工具与组件 | [Trustee 发型版本](https://github.com/openanolis/trustee/releases) |
+| TNG          | 2.2.4    | 基于远程证明的可信网关，无需改造现有应用实现零信任架构的端到端加密通信 | [TNG 发型版本](https://github.com/inclavare-containers/TNG/releases) |
 
-**完整变更日志**
+**历史版本**：详见 [版本发布说明](docs/RELEASE_NOTES.md)
 
-- [Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
-- [Trustee Releases](https://github.com/openanolis/trustee/releases)
-- [TNG Releases](https://github.com/inclavare-containers/TNG/releases)
+**版兼容信息**：详见 [版本兼容信息](docs/VERSIONS.md)
 
-## 功能特性
+<!-- ## 功能特性 -->
 
 <!-- - **核心功能1**：描述 + 技术亮点（例如：基于TensorFlow Lite的实时推理）
 - **核心功能2**：异步任务处理 + 性能指标（例如：每秒处理10k+请求）
