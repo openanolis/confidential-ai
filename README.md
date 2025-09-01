@@ -9,33 +9,22 @@ The Confidential AI open-source project enables developers to securely execute s
 ## Table of Contents
 
 - [Components](#Components)
-- [Features](#Features)
 - [Deployment](#Deployment)
 - [License](#License)
 
 ## Components
 
-**Current Stable Version**: `v1.0.0` - 2025-06-01
-**Core Update**: First release of Confidential AI
+**Current Stable Version**: `v1.1.0` - 2025-08-01
 
-| Component   | Version | Function Description                          | Change Summary |
+| Component   | Version | Function Description                          | Full Change Log |
 |-------------|---------|-----------------------------------------------|----------------|
-| Trustiflux  | 1.1.0   | Integrates CDH/AA to provide resource security management and remote attestation services for confidential computing containers | Added AA/CDH dracut module support<br>Architecture restructured: RACR protocol migrated to CDH<br>Security enhancements: Integrated TPM attestation module |
-| Trustee     | 1.1.3   | Tools and components for verifying confidential computing TEE (Trust Execution Environment) and secret data delivery | Integrated TPM private key CA plugin<br>Added authentication policy query API |
-| TNG         | 1.0.3   | Trusted gateway based on remote attestation, enabling end-to-end encrypted communication for zero-trust architecture without application modifications | - |
+| Trustiflux  | 1.3.1   | Integrates CDH/AA to provide resource security management and remote attestation services for confidential computing containers | [Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases) |
+| Trustee     | 1.5.1   | Tools and components for verifying confidential computing TEE (Trust Execution Environment) and secret data delivery | [Trustee Releases](https://github.com/openanolis/trustee/releases) |
+| TNG         | 2.2.4   | Trusted gateway based on remote attestation, enabling end-to-end encrypted communication for zero-trust architecture without application modifications | [TNG Releases](https://github.com/inclavare-containers/TNG/releases) |
 
-**Full Change Log**
+**Previous versions**: see [Release Notes](docs/RELEASE_NOTES.md).
 
-- [Trustiflux Releases](https://github.com/inclavare-containers/guest-components/releases)
-- [Trustee Releases](https://github.com/openanolis/trustee/releases)
-- [TNG Releases](https://github.com/inclavare-containers/TNG/releases)
-
-## Features
-
-<!-- - **Core Feature 1**: Description + Technical Highlights (e.g., Real-time inference based on TensorFlow Lite)
-- **Core Feature 2**: Asynchronous task processing + Performance metrics (e.g., 10k+ requests per second)
-- **Expansion Capabilities**: Plugin system/Custom module support
-- **Cross-platform**: Supports Windows/Linux/macOS/Docker -->
+**Version compatibility information**: see [Version Compatibility](docs/VERSIONS.md).
 
 ## Deployment
 
