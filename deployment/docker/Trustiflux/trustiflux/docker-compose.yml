@@ -2,15 +2,19 @@ services:
   attestation-agent:
     # build:
     #   dockerfile: Dockerfile.aa
-    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/attestation-agent:0.0.2
+    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/attestation-agent:1.4.2
     environment:
       - RUST_LOG=debug
       - TRUSTEE_ADDR=${TRUSTEE_ADDR}
       - AS_ADDR=${TRUSTEE_ADDR}/as/
     volumes:
       - attestation-agent-sock:/run/confidential-containers/attestation-agent/
+      - /sys/devices:/sys/devices
     devices:
-      - /dev/tdx_guest
+      # TODO: Currently mapping the entire /dev directory into the container. 
+      # In the future, we should map only the specific device based on the TEE hardware type.
+      # e.g. /dev/tdx_guest, /dev/csv_guest
+      - /dev:/dev
     privileged: true
     cap_add:
       - NET_ADMIN
@@ -28,7 +32,7 @@ services:
   confidential-data-hub:
     # build:
     #   dockerfile: Dockerfile.cdh
-    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/confidential-data-hub:0.0.2
+    image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/confidential-data-hub:1.4.2
     environment:
       - TRUSTEE_ADDR=${TRUSTEE_ADDR}
       - CDH_KEY_ID=kbs:///${KBS_KEY_PATH}

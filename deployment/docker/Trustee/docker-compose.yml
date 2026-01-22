@@ -4,19 +4,22 @@ services:
     # build:
     #   context: .
     #   dockerfile: Dockerfile.kbs
-    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/kbs:0.0.5
+    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/kbs:1.6.0
     command: [
       "/usr/local/bin/kbs",
       "--config-file",
       "/etc/kbs-config.toml",
     ]
     restart: always # keep the server running
+    environment:
+      RUST_LOG: debug
     ports:
       - "8080:8080"
     volumes:
       - ./kbs/data/kbs-storage:/opt/confidential-containers/kbs/repository:rw
       - ./kbs/config/public.pub:/opt/confidential-containers/kbs/user-keys/public.pub
       - ./kbs/config/docker-compose/kbs-config.toml:/etc/kbs-config.toml
+      - ./kbs/config/docker-compose/policy.rego:/opt/confidential-containers/kbs/policy.rego
     depends_on:
       - as
 
@@ -24,7 +27,7 @@ services:
     # build:
     #   context: .
     #   dockerfile: Dockerfile.as-grpc
-    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/as:0.0.5
+    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/as:1.6.0
     ports:
       - "50004:50004"
     restart: always
@@ -48,7 +51,7 @@ services:
     # build:
     #   context: .
     #   dockerfile: Dockerfile.as-restful
-    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/as-restful:0.0.5
+    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/as-restful:1.6.0
     ports:
       - "50005:50005"
     restart: always
@@ -69,7 +72,7 @@ services:
       - rvps
 
   rvps:
-    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/rvps:0.0.5
+    image: trustee-registry.cn-hangzhou.cr.aliyuncs.com/instance/rvps:1.6.0
     # build:
     #   context: .
     #   dockerfile: Dockerfile.rvps
@@ -79,15 +82,20 @@ services:
     volumes:
       - ./kbs/data/reference-values:/opt/confidential-containers/attestation-service/reference_values:rw
       - ./kbs/config/rvps.json:/etc/rvps.json:rw
+    command: [
+      "rvps",
+      "--address",
+      "0.0.0.0:50003"
+    ]
 
-  trustee-client:
-    build:
-      context: .
-      dockerfile: Dockerfile.trustee-client
-    volumes:
-      - ./../data/:/tmp/:rw
-      - ./kbs/config/rvps.json:/etc/rvps.json:rw
-    command: sh -c "cp /usr/local/bin/trustee-client /tmp/"
+  # trustee-client:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.trustee-client
+  #   volumes:
+  #     - ./../data/:/tmp/:rw
+  #     - ./kbs/config/rvps.json:/etc/rvps.json:rw
+  #   command: sh -c "cp /usr/local/bin/trustee-client /tmp/"
 
   tng:
     image: confidential-ai-registry.cn-shanghai.cr.aliyuncs.com/product/tng:1.0.2

@@ -17,26 +17,6 @@ According to the threat model, the first two steps occur on the user side, while
 
 ## Configuring and Starting Trustee
 
-### Configure Alibaba Cloud PCCS
-
-1. Run the command below to automatically configure Alibaba Cloud PCCS for Alibaba Cloud ECS.
-
-```shell
-token=$(curl -s -X PUT -H "X-aliyun-ecs-metadata-token-ttl-seconds: 5" "http://100.100.100.200/latest/api/token")
-region_id=$(curl -s -H "X-aliyun-ecs-metadata-token: $token" http://100.100.100.200/latest/meta-data/region-id)
-
-# Set PCCS_URL to point to the PCCS in the instance's region
-PCCS_URL=https://sgx-dcap-server-vpc.${region_id}.aliyuncs.com/sgx/certification/v4/
-sudo bash -c 'cat > /etc/sgx_default_qcnl.conf' << EOF
-# PCCS server address
-PCCS_URL=${PCCS_URL}
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-EOF
-```
-
-### Run Trustee
-
 1. Download the Confidential-AI code.
 
 ```shell
@@ -61,8 +41,6 @@ cd Confidential-AI/Trustee
 
 ## Configuring and Starting Trustiflux
 
-### Run Trustiflux
-
 1. Download the Confidential-AI code.
 
 ```shell
@@ -70,7 +48,7 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 ```
 
 2. (Optional) Configure the `Confidential-AI/.env` file. Non-empty fields must match the Trustee-side configuration.
-- `MODEL_TYPE`: Model type, currently supports `DeepSeek-R1-Chat`|`Qwen-7B-Instruct`;
+- `MODEL_TYPE`: Model type, currently supports `Qwen3-0.6B`|`DeepSeek-R1-Chat`|`Qwen-7B-Instruct`;
 - `GOCRYPTFS_PASSWORD`: Leave empty; it will be obtained from Trustee via remote attestation;
 - `KBS_KEY_PATH`: Path to the encrypted key in Trustee;
 - `ENCRYPT_MODEL_IP`: IP address of the file web service on Trustee side;
@@ -101,17 +79,10 @@ The inference web service deployed on the Trustiflux side will be accessible if 
 
 Configure image acceleration based on Alibaba Cloud ACR. Refer to the official image acceleration documentation.
 
-2. Failed to Automatically Configure Alibaba Cloud PCCS
-
-You can configure it manually. If you have correctly created the Alibaba Cloud TDX ECS according to the preparation instructions, the region for your instance should be North China 2 (Beijing), i.e., `cn-beijing`. Manually create the `/etc/sgx_default_qcnl.conf` file and write the following content.
-
-```shell
-# PCCS server address
-PCCS_URL=https://sgx-dcap-server.cn-beijing.aliyuncs.com/sgx/certification/v4/
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-```
-
-3. Failed to Run run.sh
+2. Failed to Run run.sh
 
 First run the `clean.sh` file in the same directory, then run `run.sh`.
+
+3. Execution fails in CSV environment
+
+Please refer to [CSV Virtual Machine Confidential_AI](https://openanolis.cn/sig/Hygon-Arch/doc/1358389851069644815) to ensure the CSV environment is configured correctly.

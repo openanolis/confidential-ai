@@ -5,39 +5,7 @@ export $(grep -v '^#' ../.env | xargs)
 
 dnf install -y git wget unzip
 
-# 1. Setup Trustee
-REPO_URL=https://github.com/openanolis/trustee.git
-TAG=v1.1.1
-# COMMIT=17e0f5b356cbd1832d06d0021ad7abaa76767b9c
-
-if [ ! -d "./trustee" ]; then
-    if [ -n "${TAG}" ]; then
-        git clone --branch ${TAG} ${REPO_URL}
-    # elif [ -n "${COMMIT}" ]; then
-    #     git clone --depth 1 --no-checkout ${REPO_URL}
-    #     git fetch --depth 1 origin ${COMMIT}
-    #     git checkout ${COMMIT}
-    else
-        git clone ${REPO_URL}
-    fi
-fi
-cd trustee
-
-if [ ! -f "./kbs/config/private.key" ]; then
-    openssl genpkey -algorithm ed25519 > kbs/config/private.key
-    openssl pkey -in kbs/config/private.key -pubout -out kbs/config/public.pub
-elif [ ! -f "./kbs/config/public.pub" ]; then
-    openssl pkey -in kbs/config/private.key -pubout -out kbs/config/public.pub
-fi
-
-cp ../docker-compose.yml ./docker-compose.yml
-cp /etc/sgx_default_qcnl.conf ./kbs/config/
-
-docker compose --env-file ../../.env up -d
-
-cd ..
-
-# 2. Download and encrypt model
+# 1. Download and encrypt model
 MODEL=${MODEL_TYPE}
 MODEL_FILE=gocryptfs-model
 PASSWORD=${GOCRYPTFS_PASSWORD}
@@ -80,6 +48,13 @@ elif [ "${MODEL}" = "Qwen-7B-Instruct" ]; then
             || { echo "model ${MODEL} download failed"; exit 1; }
     fi
     echo "model ${MODEL} download success."
+elif [ "${MODEL}" = "Qwen3-0.6B" ]; then
+    if [ ! -f "./plain/Qwen3-0.6B-Q8_0.gguf" ]; then
+        wget -c --progress=dot:giga --show-progress --tries=30 --timeout=30 --waitretry=15 -P ./plain \
+            https://modelscope.cn/models/Qwen/Qwen3-0.6B-GGUF/resolve/master/Qwen3-0.6B-Q8_0.gguf \
+            || { echo "model ${MODEL} download failed"; exit 1; }
+    fi
+    echo "model ${MODEL} download success."
 else
     echo "model ${MODEL} not supported."
     exit 1
@@ -88,28 +63,76 @@ fi
 mkdir -p ../model && \
 tar cvzf - -C ./cipher . | split -d -b 1G - "../model/${MODEL_FILE}.tar.gz.part"
 
-cd ..
+cd ../..
 
-# 3. Upload password to KBS and set KBS policy
+# 2. Setup Trustee
+REPO_URL=https://github.com/openanolis/trustee.git
+TAG=v1.6.0
+# COMMIT=17e0f5b356cbd1832d06d0021ad7abaa76767b9c
+
+if [ ! -d "./trustee" ]; then
+    if [ -n "${TAG}" ]; then
+        git clone --branch ${TAG} ${REPO_URL}
+    # elif [ -n "${COMMIT}" ]; then
+    #     git clone --depth 1 --no-checkout ${REPO_URL}
+    #     git fetch --depth 1 origin ${COMMIT}
+    #     git checkout ${COMMIT}
+    else
+        git clone ${REPO_URL}
+    fi
+fi
+cd trustee
+
+if [ ! -f "./kbs/config/private.key" ]; then
+    openssl genpkey -algorithm ed25519 > kbs/config/private.key
+    openssl pkey -in kbs/config/private.key -pubout -out kbs/config/public.pub
+elif [ ! -f "./kbs/config/public.pub" ]; then
+    openssl pkey -in kbs/config/private.key -pubout -out kbs/config/public.pub
+fi
+
+cp ../docker-compose.yml ./docker-compose.yml
+
+# Upload password to KBS
 KEY_PATH=${KBS_KEY_PATH}
 TRUSTEE_URL=${TRUSTEE_ADDR}
 
-echo "upload '$PASSWORD_FILE' to KBS with path: $KEY_PATH"
-./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource --path ${KEY_PATH} --resource-file ${PASSWORD_FILE}
+echo "place '$PASSWORD_FILE' to KBS with path: $KEY_PATH"
+mkdir -p "kbs/data/kbs-storage/${KBS_KEY_PATH%/*}"
+cp "../data/${PASSWORD_FILE}" "kbs/data/kbs-storage/${KBS_KEY_PATH}"
 
- # WARNING: "allow_all.rego" can only be used in dev environment
-POLICY_FILE="allow_all.rego"
-cat <<EOF > ${POLICY_FILE}
-package policy
+# set as config
+jq '.attestation_token_broker.type = "Ear"' \
+  ./kbs/config/as-config.json > /tmp/as-config.json.tmp \
+  && mv /tmp/as-config.json.tmp ./kbs/config/as-config.json
 
-default allow = true
-EOF
-./trustee-client --url ${TRUSTEE_URL} config --auth-private-key ../trustee/kbs/config/private.key set-resource-policy --policy-file ${POLICY_FILE}
+# set policy
+###### Optimized policy setting for TDX / CSV with separate policy files
+# Check hardware security environment and set appropriate policy
+if [[ -e /dev/tdx_guest ]]; then
+    echo "Detected: TDX guest environment (/dev/tdx_guest present)"
+    mkdir -p kbs/config/docker-compose
+    cp ../policy/tdx/kbs_policy.rego kbs/config/docker-compose/policy.rego
+elif [[ -e /dev/csv-guest ]]; then
+    echo "Detected: CSV guest environment (/dev/csv-guest present)"
+    mkdir -p kbs/config/docker-compose kbs/data/attestation-service/token/ear/policies/opa
+    cp ../policy/csv/kbs_policy.rego kbs/config/docker-compose/policy.rego
+    cp ../policy/csv/default_cpu.rego kbs/data/attestation-service/token/ear/policies/opa/default_cpu.rego
+    cp ../policy/csv/default_dcu.rego kbs/data/attestation-service/token/ear/policies/opa/default_dcu.rego
+else
+    echo "No /dev/tdx_guest or /dev/csv-guest found; not a TDX/CSV guest or drivers not loaded."
+    echo "Use default policy (allow=all), default policy should only be used in development environment."
+    # do nothing
+fi
 
-# 4. open encrypted model for web access
+# start trustee
+docker compose --env-file ../../.env up -d
+
+cd ..
+
+# 3. open encrypted model for web access
 MODEL_PORT=${ENCRYPT_MODEL_PORT}
 
-cd model
+cd data/model
 
 if command -v python3 &> /dev/null; then
     SERVER_CMD="python3 -m http.server $MODEL_PORT --bind 0.0.0.0"
