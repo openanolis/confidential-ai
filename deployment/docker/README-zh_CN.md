@@ -17,26 +17,6 @@
 
 ## 配置和启动Trustee
 
-### 配置阿里云PCCS
-
-1. 运行下方命令即可为阿里云ECS自动配置阿里云PCCS。
-
-```shell
-token=$(curl -s -X PUT -H "X-aliyun-ecs-metadata-token-ttl-seconds: 5" "http://100.100.100.200/latest/api/token")
-region_id=$(curl -s -H "X-aliyun-ecs-metadata-token: $token" http://100.100.100.200/latest/meta-data/region-id)
-
-# 配置PCCS_URL指向实例所在Region的PCCS
-PCCS_URL=https://sgx-dcap-server-vpc.${region_id}.aliyuncs.com/sgx/certification/v4/
-sudo bash -c 'cat > /etc/sgx_default_qcnl.conf' << EOF
-# PCCS server address
-PCCS_URL=${PCCS_URL}
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-EOF
-```
-
-### 运行Trustee
-
 1. 下载Confidential-AI代码。
 
 ```shell
@@ -60,8 +40,6 @@ cd Confidential-AI/Trustee
 
 ## 配置和启动Trustiflux
 
-### 运行Trustiflux
-
 1. 下载Confidential-AI代码。
 
 ```shell
@@ -70,7 +48,7 @@ git clone https://github.com/inclavare-containers/Confidential-AI.git
 
 2. （可选）配置`Confidential-AI/.env`文件，非空字段需要与Trustee侧保持一致。
 
-- `MODEL_TYPE`：模型类型，当前支持`DeepSeek-R1-Chat`|`Qwen-7B-Instruct`；
+- `MODEL_TYPE`：模型类型，当前支持`Qwen3-0.6B`|`DeepSeek-R1-Chat`|`Qwen-7B-Instruct`；
 - `GOCRYPTFS_PASSWORD`: 留空，将经过远程证明从Trustee获取；
 - `KBS_KEY_PATH`: Trustee中加密密钥的路径；
 - `ENCRYPT_MODEL_IP`: Trustee侧文件Web服务的IP；
@@ -101,17 +79,10 @@ Trustiflux侧部署了推理web服务，如果CAI部署成功，则可以访问�
 
 基于阿里云ACR配置镜像加速，参考官方镜像加速。
 
-2. 自动配置阿里云PCCS失败
-
-可以手动配置。如果你根据环境准备中的指导正确创建阿里云TDX ECS，你的实例所属地域应为华北2（北京），即`cn-beijing`。手动创建`/etc/sgx_default_qcnl.conf`文件，并写入下述内容即可。
-
-```shell
-# PCCS server address
-PCCS_URL=https://sgx-dcap-server.cn-beijing.aliyuncs.com/sgx/certification/v4/
-# To accept insecure HTTPS cert, set this option to FALSE
-USE_SECURE_CERT=FALSE
-```
-
-3. 运行run.sh失败
+2. 运行run.sh失败
 
 先运行同目录下的`clean.sh`文件，再运行`run.sh`。
+
+3. 在CSV环境执行失败
+
+请参考[CSV虚拟机Confidential_AI](https://openanolis.cn/sig/Hygon-Arch/doc/1358389851069644815)，确保CSV环境配置正确。
