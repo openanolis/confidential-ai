@@ -1,6 +1,20 @@
 FROM python:3.13-slim
 WORKDIR /app
 
+# 替换为国内源（USTC）
+# RUN sed -i 's@deb.debian.org@mirrors.ustc.edu.cn@g' /etc/apt/sources.list.d/debian.sources && \
+#     sed -i 's@security.debian.org@mirrors.ustc.edu.cn@g' /etc/apt/sources.list.d/debian.sources && \
+#     apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#         git \
+#         wget \
+#         curl \
+#         cmake \
+#         build-essential \
+#         libcurl4-openssl-dev \
+#         python3-dev \
+#     && rm -rf /var/lib/apt/lists/*
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git \
